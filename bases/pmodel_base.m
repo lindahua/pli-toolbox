@@ -4,16 +4,16 @@ classdef pmodel_base < handle
     
     methods(Abstract)
         
-        [obs, n] = check_observations(obj, obs)
+        n = check_observations(self, obs)
         % Verify the validity of input observations
         
-        params = estimate_param(obj, obs, weights, hints)
+        params = estimate_param(self, obs, weights, hints)
         % Estimate model parameters from observations
         
-        L = evaluate_loglik(obj, params, obs)
+        L = evaluate_loglik(self, params, obs)
         % Evaluate log-likelihoods w.r.t. given parameters
         
-        L = evaluate_logpri(obj, params)
+        L = evaluate_logpri(self, params)
         % Evaluate log prior values of the input parameters
         
     end
