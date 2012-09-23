@@ -1,0 +1,5 @@
+# Test cases for common module
+
+test_add_diagonals(3, 3)
+test_add_diagonals(2, 3)
+test_add_diagonals(3, 2)

@@ -1,0 +1,11 @@
+# Test cases for metrics module
+
+test_pw_euclidean(5, 10, 12)
+
+test_pw_qdist(0, 3, 10, 12)
+test_pw_qdist(1, 3, 10, 12)
+test_pw_qdist(2, 3, 10, 12)
+
+test_pw_mahdist(0, 3, 10, 12)
+test_pw_mahdist(1, 3, 10, 12)
+test_pw_mahdist(2, 3, 10, 12)
