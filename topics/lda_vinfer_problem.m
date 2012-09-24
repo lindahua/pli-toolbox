@@ -105,12 +105,11 @@ classdef lda_vinfer_problem < handle
             
             % entropy of gamma
             
-            ent_gam = sum(gammaln(gam)) - gammaln(sum(gam)) - ...
-                (gam - 1)' * elog_theta;
+            ent_gam = dirichlet_entropy(gam, elog_theta);
             
             % entropy of phi
             
-            ent_phi = - (h' * nansum(phi .* log(phi), 2));
+            ent_phi = h' * ddentropy(phi, 2);
             
             % overall
             
@@ -160,20 +159,10 @@ classdef lda_vinfer_problem < handle
             %   then updates gamma based on phi.
             %
             
-            gam = sol.gamma;
-            h = sol.h;
+            % Perform update
             
-            % update phi
-            
-            log_phi = bsxfun(@plus, self.log_unigrams, psi(gam).');
-            phi = normalize_exp(log_phi, 2);
-            
-            toc_w = (h' * phi).';
-            
-            % update gamma
-            
-            gam = self.alpha + toc_w;
-            elog_theta = psi(gam) - psi(sum(gam));
+            [gam, phi, toc_w, elog_theta] = lda_vinfer_update( ...
+                self.alpha, self.log_unigrams, sol.h, sol.gamma, 1);            
             
             % write to sol
             

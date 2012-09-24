@@ -9,7 +9,8 @@ function lda_vem_demo()
 V = 8;
 K = 3;
 doc_len = 200;
-ndocs = 5;
+ndocs = 100;
+ndocs_show = 5;
 
 %% Generate data
 
@@ -18,7 +19,7 @@ disp('========================');
 
 % topics
 
-U = rand(V, K);
+U = exp(8 * rand(V, K));
 U = bsxfun(@times, U, 1 ./ sum(U, 1));
 
 for k = 1 : K
@@ -41,6 +42,7 @@ disp('========================');
 
 Theta = dirichlet_sample(alpha, ndocs);
 
+H = zeros(V, ndocs);
 for i = 1 : ndocs
     
     theta = Theta(:, i);
@@ -48,31 +50,68 @@ for i = 1 : ndocs
     h = mnrnd(doc_len, p);
     
     H(:,i) = h;
-    print_vec(sprintf('Doc [%d].hist', i), '%3d ', h);
 end
+
+for i = 1 : ndocs_show
+    print_vec(sprintf('Doc [%d].hist', i), '%3d ', H(:,i));
+end
+
 disp(' ');
 
 
 %% Inference for individual documents
 
 disp('Document inference');
+disp('  gamma: posterior param');
+disp('  pmean: posterior mean');
+disp('  theta: underlying p');
 disp('========================');
 
 vi_problem = lda_vinfer_problem(alpha, U);
 
-for i = 1 : ndocs
+for i = 1 : ndocs_show
     
     h = H(:, i);
     sol = vi_problem.init_solution(h);
     
-    sol = iter_optimize('maximize', ...
-        @vi_problem.eval_objv, @vi_problem.update, sol, ...
+    sol = iter_optimize('maximize', @vi_problem.eval_objv, ...
+        @vi_problem.update, sol, ...
         'display', 'off');
         
-    print_vec(sprintf('Doc [%d].gamma', i), '%.4f ', sol.gamma); 
+    print_vec(sprintf('Doc [%d].gamma', i), '%8.4f ', sol.gamma); 
+    print_vec('        pmean', '%8.4f ', sol.gamma / sum(sol.gamma));
+    print_vec('        theta', '%8.4f ', Theta(:,i));
+    fprintf('\n');
 end
 
 disp(' ');
+
+%% Estimation using Variational EM
+
+answer = input('Do you want to see Variational EM ? (y/n): ', 's');
+if ~strcmpi(answer, 'y')
+    return;
+end
+
+
+disp('Model Estimation (VEM)');
+disp('========================');
+
+vem_problem = lda_vem_problem(V, 0.01);
+vem_problem.set_docs(H);
+
+U_init = U + 0.1 * rand(size(U));
+U_init = bsxfun(@times, U_init, 1 ./ sum(U, 1));
+
+sol = vem_problem.init_solution(U_init);
+
+sol = iter_optimize('maximize', @vem_problem.eval_objv, ...
+    @vem_problem.update, sol, ...
+    'maxiter', 100, ...
+    'display', 'iter');
+
+print_vec('est  alpha', '%7.4f ', sol.alpha);
+print_vec('true alpha', '%7.4f ', alpha);
 
 
 function print_vec(title, spec, v)
