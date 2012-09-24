@@ -183,6 +183,8 @@ classdef fmm_em_problem < handle
             %   Note: the components and logliks are set to empty.
             %
             
+            n = self.nobs;
+            
             if isscalar(K)
                 Q = rand(K, n);
                 Q = bsxfun(@times, Q, 1 ./ sum(Q, 1));
@@ -221,7 +223,9 @@ classdef fmm_em_problem < handle
             %
             
             mdl = self.model;
+            n = self.nobs;
             O = self.obs;
+            w = self.weights;
             pric = self.pricount;
             
             % M-step

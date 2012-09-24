@@ -1,9 +1,12 @@
-function h = gauss2d_contour(G, r, n, varargin)
+function gauss2d_contour(G, r, n, varargin)
 %GAUSS2D_CONTOUR Draws a Gaussian elliptic contour
 %
 %   gauss2d_contour(G);
 %       Draws a standard Gaussian contour (the points whose Mahalanobis
 %       distance to the center is 1).
+%
+%       When G.num > 1, it draws multiple contours, each for one
+%       distribution in G.
 %
 %   gauss2d_contour(G, r);
 %       Draws a standard Gaussian contour, where the Malalanobis distance
@@ -23,9 +26,9 @@ function h = gauss2d_contour(G, r, n, varargin)
 
 %% argument checking
 
-if ~(isstruct(G) && strcmp(G.tag, 'gauss') && G.num == 1)
+if ~(isstruct(G) && strcmp(G.tag, 'gauss') && G.dim == 2)
     error('gauss2d_contour:invalidarg', ...
-        'G should be a Gaussian struct with G.num == 1.');
+        'G should be a Gaussian struct with G.dim == 2.');
 end
 
 if nargin < 2
@@ -49,27 +52,92 @@ end
 %% main
 
 t = linspace(0, 2*pi, n);
+x0 = r * cos(t);
+y0 = r * sin(t);
 
-Z = r * [cos(t); sin(t)];
+m = G.num;
 
-cov = G.cov;
-if isscalar(cov)
-    X = sqrt(cov) * Z;
-elseif size(cov, 2) == 1
-    X = bsxfun(@times, sqrt(cov), Z);
+if m == 1
+    [xt, yt] = transform_single(G.mu, G.cov, G.cform, x0, y0);
+    plot(xt, yt, varargin{:});
 else
-    L = chol(cov, 'lower');
-    X = L * Z;
+    cf = G.cform;
+    for k = 1 : m        
+        [mu_k, cov_k] = get_single(G, k);
+        [xt, yt] = transform_single(mu_k, cov_k, cf, x0, y0);
+        
+        if k > 1
+            hold on;
+        end
+        plot(xt, yt, varargin{:});
+    end
 end
 
-if ~isequal(G.mu, 0)
-    X = bsxfun(@plus, X, G.mu);
+
+function [xt, yt] = transform_single(mu, cov, cf, x, y)
+
+switch cf
+    case 0
+        s = sqrt(cov);
+        xt = s * x;
+        yt = s * y;
+    case 1
+        s = sqrt(cov);
+        xt = s(1) * x;
+        yt = s(2) * y;
+    case 2
+        % 2D Cholesky decompostion
+        c11 = cov(1, 1);
+        c12 = cov(1, 2);
+        c22 = cov(2, 2);
+        
+        % L = [a 0; b c]
+        
+        a = sqrt(c11);
+        b = c12 / a;
+        c = sqrt(c22 - b^2);
+        
+        % apply transform
+        xt = a * x;
+        yt = b * x + c * y;
 end
 
-if nargout == 0
-    plot(X(1,:), X(2,:), varargin{:});
+if ~isequal(mu, 0)
+    xt = xt + mu(1);
+    yt = yt + mu(2);
+end
+
+
+function [mu, cov] = get_single(G, i)
+% get the mean and covariance of a particular Gauss
+
+
+if size(G.mu, 2) == 1
+    mu = G.mu;
 else
-    h = plot(X(1,:), X(2,:), varargin{:});
+    mu = G.mu(:, i);
 end
 
+G_cov = G.cov;
+
+switch G.cform
+    case 0
+        if isscalar(G_cov)
+            cov = G_cov;
+        else
+            cov = G_cov(i);
+        end
+    case 1
+        if size(G_cov, 2) == 1
+            cov = G_cov;
+        else
+            cov = G_cov(:, i);
+        end
+    case 2
+        if ismatrix(G_cov)
+            cov = G_cov;
+        else
+            cov = G_cov(:,:,i);
+        end
+end
 

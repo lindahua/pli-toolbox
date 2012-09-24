@@ -83,6 +83,7 @@ end
 
 % problem construction
 
+d = size(X, 1);
 model = gauss_model(d, S.covform);
 problem = fmm_em_problem(model, S.pricount);
 

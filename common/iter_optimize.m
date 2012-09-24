@@ -73,12 +73,17 @@ last_t = 0;
 
 objv = nan;
 
+if displevel >= 2
+    fprintf('#Iter         obj.value        obj.change\n');
+    fprintf('=============================================\n');
+end
+
 while ~converged && t < maxiter
     t = t + 1;
     pre_objv = objv;
     
     if displevel >= 2
-        fprintf('Iter %d:\n', t);
+        fprintf('%5d ', t);
     end
     
     % update solution
@@ -91,10 +96,6 @@ while ~converged && t < maxiter
     
     if t > 1
         ch = objv - pre_objv;
-        if ch * optim_dir < -tolfun
-            warning('iter_optim:objvchange', ...
-                'Unexpected objective function changes: %g', ch); 
-        end
         
         % determine convergence
         
@@ -110,10 +111,19 @@ while ~converged && t < maxiter
     
     if displevel >= 2
         if t == 1
-            fprintf('\tobjv = %g\n', objv);
+            fprintf('\t%15g\n', objv);
         else
-            fprintf('\tobjv = %g (ch = %g)\n', objv, ch);
+            fprintf('\t%15g   %15g\n', objv, ch);
         end        
+    end
+    
+    % diagnosis
+    
+    if t > 1
+        if ch * optim_dir < -tolfun
+            warning('iter_optim:objvchange', ...
+                'Unexpected objective function changes: %g', ch);
+        end
     end
     
 end

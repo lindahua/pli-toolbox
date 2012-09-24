@@ -118,9 +118,7 @@ switch cf
         if tie_multi
             cov = zeros(d, d);
             for k = 1 : m
-                Exx = est_full_cov(X, mu(:,k), w(:,k), inv_sw(k));
-                mu_k = mu(:, k);
-                Ck = Exx - mu_k * mu_k';
+                Ck = est_full_cov(X, mu(:,k), w(:,k), inv_sw(k));
                 cov = cov + Ck * sw(k);
             end
         else
