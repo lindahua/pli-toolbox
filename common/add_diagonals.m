@@ -26,5 +26,9 @@ end
 
 siz = size(A);
 inds = 1 + (0:min(siz)-1) * (siz(1)+1);
+
+if size(v, 1) > 1
+    v = v.';
+end
 A(inds) = A(inds) + v;
 
