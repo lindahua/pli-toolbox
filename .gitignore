@@ -1,1 +1,9 @@
 *.m~
+*.cpp~
+sandbox/*
+
+*.mexw32
+*.mexw64
+*.mexglx
+*.mexa64
+*.mexmaci64
