@@ -5,3 +5,6 @@ test_add_diagonals(2, 3)
 test_add_diagonals(3, 2)
 
 test_intcount()
+
+test_aggregx(2, 3)
+test_aggregx(25, 30)
