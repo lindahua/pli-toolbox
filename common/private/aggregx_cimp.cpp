@@ -7,58 +7,10 @@
  **********************************************************/
 
 #include <light_mat/matlab/matlab_port.h>
-#include <limits>
+#include "aggreg_base.h"
 
 using namespace lmat;
 using namespace lmat::matlab;
-
-// operations
-
-template<typename T>
-struct aop_sum
-{
-    LMAT_ENSURE_INLINE
-    void init(const index_t n, T *x) { }
-    
-    LMAT_ENSURE_INLINE
-    void operator() (T& a, const T& x) { a += x; }
-};
-
-
-template<typename T>
-struct aop_max
-{
-    LMAT_ENSURE_INLINE
-    void init(const index_t n, T *x) 
-    {
-        T v0 = -std::numeric_limits<T>::infinity();
-        fill_val(v0, n, x);
-    }
-    
-    LMAT_ENSURE_INLINE
-    void operator() (T& a, const T& x) 
-    { 
-        if (x > a) a = x;
-    }
-};
-
-
-template<typename T>
-struct aop_min
-{
-    LMAT_ENSURE_INLINE
-    void init(const index_t n, T *x) 
-    {
-        T v0 = std::numeric_limits<T>::infinity();
-        fill_val(v0, n, x);
-    }
-    
-    LMAT_ENSURE_INLINE
-    void operator() (T& a, const T& x) 
-    { 
-        if (x < a) a = x;
-    }
-};
 
 // aggregation functors
 
