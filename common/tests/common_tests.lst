@@ -8,3 +8,5 @@ test_intcount()
 
 test_aggregx(2, 3)
 test_aggregx(25, 30)
+
+test_aggreg2()
