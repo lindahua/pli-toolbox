@@ -15,11 +15,6 @@ classdef test_pw_euclidean < mtest_case
             obj.Y = rand(d, n);            
         end
         
-        function s = name(self)
-            s = sprintf('%s [d = %d]', ...
-                class(self), self.dim);
-        end
-        
         function test_sqeucdist(self)
             D0 = self.safe_sqdist(self.X, self.Y);
             D = pw_euclidean(self.X, self.Y, 'sq');
