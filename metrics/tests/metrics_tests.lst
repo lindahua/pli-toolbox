@@ -5,6 +5,11 @@ test_pw_cityblock(5, 10, 12)
 test_pw_chebyshev(5, 10, 12)
 test_pw_hamming(5, 10, 12)
 
+test_pw_minkowski(1, 5, 10, 12)
+test_pw_minkowski(2, 5, 10, 12)
+test_pw_minkowski(3, 5, 10, 12)
+test_pw_minkowski(inf, 5, 10, 12)
+
 test_pw_qdist(0, 3, 10, 12)
 test_pw_qdist(1, 3, 10, 12)
 test_pw_qdist(2, 3, 10, 12)

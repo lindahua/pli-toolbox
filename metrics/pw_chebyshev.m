@@ -30,5 +30,9 @@ end
     
 %% main
 
+if ~(isempty(Y) || isa(Y, class(X)))
+    Y = cast(Y, class(X));
+end
+
 D = pw_metrics_cimp(int32(2), X, Y);
 
