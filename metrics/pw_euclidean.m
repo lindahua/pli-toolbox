@@ -23,7 +23,7 @@ function D = pw_euclidean(X, Y, op)
 
 %% argument checking
 
-if ~(ismatrix(X) && isreal(X))
+if ~(ismatrix(X) && isfloat(X) && isreal(X))
     error('pw_euclidean:invalidarg', 'X must be a real matrix.');
 end
 
@@ -33,7 +33,7 @@ else
     if isempty(Y)
         with_self = 1;
     else
-        if ~(ismatrix(Y) && isreal(Y))
+        if ~(ismatrix(Y) && isfloat(Y) && isreal(Y))
             error('pw_euclidean:invalidarg', 'Y must be a real matrix.');
         end
         
