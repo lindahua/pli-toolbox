@@ -1,6 +1,6 @@
 /**********************************************************
  *
- *  intcount1_cimp.cpp
+ *  find_bin_cimp.cpp
  *
  *  C++ mex implementation of find_bin 
  *
