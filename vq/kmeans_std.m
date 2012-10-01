@@ -1,15 +1,15 @@
-function [C, L, objv, min_ds] = kmeans_std(X, K, varargin)
+function [L, C, objv, min_ds, cnts] = kmeans_std(X, K, varargin)
 %KMEANS_STD Standard K-means clustering
 %
-%   [C, L] = KMEANS_STD(X, K, ...);
-%   [C, L] = KMEANS_STD(X, C0, ...);
+%   [L, C] = KMEANS_STD(X, K, ...);
+%   [L, C] = KMEANS_STD(X, C0, ...);
 %
 %       Performs standard K-means on a set of vectors, and returns 
 %       the resultant labels in L, and the centers in C.
 %
-%   [C, L, objv] = KMEANS_STD( ... );
-%   [C, L, objv, min_ds] = KMEANS_STD( ... );
-%   [C, L, objv, min_ds, cnts] = KMEANS_STD( ... );
+%   [L, C, objv] = KMEANS_STD( ... );
+%   [L, C, objv, min_ds] = KMEANS_STD( ... );
+%   [L, C, objv, min_ds, cnts] = KMEANS_STD( ... );
 %
 %       With more output arguments, this function returns additional
 %       information about the result.
@@ -27,9 +27,9 @@ function [C, L, objv, min_ds] = kmeans_std(X, K, varargin)
 %
 %   Returns
 %   -------
-%   - C :       The matrix of resultant centers. (size is [d K]).
-%
 %   - L :       The vector of result labels. (size is [1 n]).
+%
+%   - C :       The matrix of resultant centers. (size is [d K]).
 %
 %   - objv :    The objective value at final step, which equals
 %               sum(min_ds).

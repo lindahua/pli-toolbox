@@ -32,7 +32,7 @@ X = randn(d, n);
 
 % perform K-means
 
-C = kmeans_std(X, K, 'display', 'iter');
+[~, C] = kmeans_std(X, K, 'display', 'iter');
 
 % visualize results
 
