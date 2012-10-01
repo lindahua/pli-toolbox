@@ -126,7 +126,7 @@ if isempty(s0)
         case 'rand'
             s = sample_wor(n, K);
         otherwise
-            error('kmedoid_std:invalidarg', ...
+            error('kmedoid:invalidarg', ...
                 'Invalid value for the option init.');
     end
 else
