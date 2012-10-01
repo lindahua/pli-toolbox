@@ -42,14 +42,13 @@ end
 if nargin < 3
     is_sorted = false;
 else
-    if ~(islogical(is_sorted) && isscalar(is_sorted))
-        error('find_bin:invalidarg', ...
-            'is_sorted should be a logical scalar.');
+    if ~isscalar(is_sorted)
+        error('find_bin:invalidarg', 'is_sorted should be a scalar.');
     end
 end
 
 
 %% main
 
-r = find_bin_cimp(edges, x, is_sorted);
+r = find_bin_cimp(edges, x, logical(is_sorted));
 
