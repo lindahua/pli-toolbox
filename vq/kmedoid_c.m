@@ -1,5 +1,5 @@
 function [L, s, objv, mincost, cnts] = kmedoid_c(C, K, varargin)
-%KMEDOID k-Medoid clustering based on pre-computed cost matrix
+%KMEDOID K-medoid clustering based on pre-computed cost matrix
 %
 %   [L, s] = KMEDOID_C(C, K, ...);
 %   [L, s] = KMEDOID_C(C, s0, ...);
@@ -112,21 +112,123 @@ displevel = check_options(opts);
 if isempty(s0)
     switch opts.init
         case 'kmpp'
-            s = kmpp_seed(X, K, cfun);
+            s = kmpp_seed_c(C, K);
         case 'rand'
             s = sample_wor(n, K);
         otherwise
-            error('kmedoid:invalidarg', ...
+            error('kmedoid_c:invalidarg', ...
                 'Invalid value for the option init.');
     end
 else
     s = s0;
 end
 
+[mincost, L] = min(C(s, :), [], 1);
+[sL, gb, ge] = idxgroup(K, L);
+objv = sum(mincost);
+
+% Iterative update
+
+maxiter = opts.maxiter;
+tolfun = opts.tolfun;
+
+t = 0;
+converged = false;
+
+% print header
+
+if displevel >= 2
+    fprintf('%-6s %15s %15s %12s %12s\n', ...
+        'Iters', 'obj.value', 'obj.change', ...
+        'centers.#ch', 'labels.#ch');
+end
+
+while ~converged && t < maxiter
+    t = t + 1;
+    
+    pre_s = s;
+    pre_L = L;
+    pre_objv = objv;
+    
+    % update centers
+    
+    for k = 1 : K
+        Ik = sL(gb(k):ge(k));
+        Ck = C(Ik, Ik);
+        [~, i] = min(sum(Ck, 2));
+        s(k) = Ik(i);
+    end
+       
+    ch_c = find(s ~= pre_s);
+    if ~isempty(ch_c)        
+        
+        % update labels
+                
+        [mincost, L] = min(C(s, :), [], 1);
+        [sL, gb, ge] = idxgroup(K, L);
+        
+        objv = sum(mincost);
+        
+        ch_l = sum(L ~= pre_L);
+        ch_v = objv - pre_objv;
+    else
+        ch_l = 0;
+        ch_v = 0;
+    end
+                        
+    % determine convergence
+        
+    converged = (ch_l == 0) || (abs(ch_v) <= tolfun);   
+    
+    % print iteration info
+            
+    if displevel >= 2
+        fprintf('%-6d %15g %15g %12d %12d\n', ...
+            t, objv, ch_v, numel(ch_c), ch_l);
+    end
+    
+end
+
+cnts = double((ge - gb + 1).');
 
 
+%% Auxiliary functions
 
+function displevel = check_options(s)
 
+v = s.maxiter;
+if ~(isscalar(v) && isnumeric(v) && isreal(v) && v >= 1)
+    error('kmedoid_c:invalidarg', ...
+        'The value for option maxiter should be a positive integer.');
+end
 
+v = s.tolfun;
+if ~(isscalar(v) && isfloat(v) && isreal(v) && v >= 0)
+    error('kmedoid_c:invalidarg', ...
+        'The value for option tolfun should be a non-negative scalar.');
+end
 
+v = s.display;
+if ~ischar(v)
+    error('kmedoid_c:invalidarg', ...
+        'The value for option display should be a string.');
+end
+
+switch lower(v)
+    case 'off'
+        displevel = 0;
+    case 'final'
+        displevel = 1;
+    case 'iter'
+        displevel = 2;
+    otherwise
+        error('kmedoid_c:invalidarg', ...
+            'Invalid value for option display.');
+end
+
+v = s.init;
+if ~ischar(v)
+    error('kmedoid_c:invalidarg', ...
+        'The value for option init should be a string.');
+end
 
