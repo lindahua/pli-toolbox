@@ -22,8 +22,8 @@ function [U, evs] = symeig(C)
 [U, D] = eig(C);
 evs = diag(D);
 
-if ~issorted(evs)
-    [evs, si] = sort(evs);
+if ~issorted(-evs)
+    [evs, si] = sort(evs, 1, 'descend');
     U = U(:, si);
 end
 
