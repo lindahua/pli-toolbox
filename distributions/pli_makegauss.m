@@ -1,13 +1,13 @@
-function G = make_gauss(d, mu, cov, op)
-%MAKE_GAUSS Construct a Gaussian struct
+function G = pli_makegauss(d, mu, cov, op)
+%PLI_MAKEGAUSS Construct a Gaussian struct
 %
-%   G = MAKE_GAUSS(d, mu, cov);
+%   G = PLI_MAKEGAUSS(d, mu, cov);
 %
 %       Constructs a struct representing a Gaussian distribution or
 %       a collection of multiple Gaussian distribution(s) over a
 %       d-dimensional space.
 %
-%   G = MAKE_GAUSS(d, mu, cov, 'tie_cov');
+%   G = PLI_MAKEGAUSS(d, mu, cov, 'tie_cov');
 %
 %       Constucts a Gaussian struct with tied covariance,
 %       i.e. a covariance matrix is shared across all distributions.
@@ -64,7 +64,7 @@ function G = make_gauss(d, mu, cov, op)
 % for argument: d
 
 if ~(isscalar(d) && d >= 1)
-    error('make_gauss:invalidarg', 'd should be a positive integer.');
+    error('pli_makegauss:invalidarg', 'd should be a positive integer.');
 end
 
 % for argument: mu
@@ -73,7 +73,7 @@ if isequal(mu, 0)
     m = 1;
 else
     if ~(ismatrix(mu) && size(mu, 1) == d)
-        error('make_gauss:invalidarg', 'The size of mu is invalid.');
+        error('pli_makegauss:invalidarg', 'The size of mu is invalid.');
     end
     m = size(mu, 2);
 end
@@ -84,7 +84,7 @@ if nargin < 4
     tie_c = 0;
 else
     if ~strcmp(op, 'tie_cov')
-        error('make_gauss:invalidarg', ...
+        error('pli_makegauss:invalidarg', ...
             'Failed to recognize the 4th argument.');
     end
     tie_c = 1;
@@ -93,7 +93,7 @@ end
 % for argument: cov
 
 if ~(isfloat(cov) && isreal(cov))
-    error('make_gauss:invalidarg', ...
+    error('pli_makegauss:invalidarg', ...
         'cov should be a real matrix.');
 end
 
@@ -126,7 +126,7 @@ else
 end
 
 if cform < 0
-    error('make_gauss:invalidarg', 'The size of cov is invalid.');
+    error('pli_makegauss:invalidarg', 'The size of cov is invalid.');
 end
         
 %% make struct

@@ -25,11 +25,11 @@ classdef test_gauss_sample < mtest_case
                     C = diag(cov);
                 case 'f'
                     T = randn(d, d);
-                    cov = add_diagonals(T * T', 1.0);
+                    cov = pli_adddiag(T * T', 1.0);
                     C = cov;
             end
             
-            obj.gauss = make_gauss(d, mu, cov);
+            obj.gauss = pli_makegauss(d, mu, cov);
             assert(obj.gauss.num == 1);
             
             obj.cov_mat = C;
@@ -48,7 +48,7 @@ classdef test_gauss_sample < mtest_case
             G = self.gauss;
             n = 1e6;
             
-            X = gauss_sample(G, n);
+            X = pli_gauss_sample(G, n);
             assert( mtest_has_size(X, [G.dim n]) );
             
             sample_mean = mean(X, 2);

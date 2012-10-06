@@ -1,7 +1,7 @@
-function v = mvbetaln(X)
-%MVBETALN Logarithm of multivariate beta function.
+function v = pli_mvbetaln(X)
+%PLI_MVBETALN Logarithm of multivariate beta function.
 %
-%   v = MVBETALN(X);
+%   v = PLI_MVBETALN(X);
 %
 %       Evaluates the logarithm of multivariate Beta function for 
 %       each vector of X.

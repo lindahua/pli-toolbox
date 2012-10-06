@@ -1,7 +1,7 @@
-function X = gauss_sample(G, n)
-%GAUSS_SAMPLE Samples from a Gaussian distribution
+function X = pli_gauss_sample(G, n)
+%PLI_GAUSS_SAMPLE Samples from a Gaussian distribution
 %
-%   X = GAUSS_SAMPLE(G, n);
+%   X = PLI_GAUSS_SAMPLE(G, n);
 %       Draws n samples from a Gaussian distribution.
 %
 %   Arguments
@@ -14,7 +14,7 @@ function X = gauss_sample(G, n)
 %% argument checking
 
 if ~(isstruct(G) && strcmp(G.tag, 'gauss') && G.num == 1)
-    error('gauss_sample:invalidarg', ...
+    error('pli_gauss_sample:invalidarg', ...
         'G should be a Gaussian struct with G.num == 1.');
 end
 

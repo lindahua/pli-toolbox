@@ -1,4 +1,4 @@
-classdef pmodel_base < handle
+classdef pli_pmodel_base < handle
     % The base class of simple probabilistic models
     %
     

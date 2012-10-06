@@ -1,5 +1,5 @@
 classdef test_gauss_mle < mtest_case
-    % Unit testing of gauss_mle
+    % Unit testing of pli_gauss_mle
     %
     
     properties
@@ -36,7 +36,7 @@ classdef test_gauss_mle < mtest_case
             % test non-weighted case
             if m == 1
                 G0 = test_gauss_mle.safe_mle(X, ones(n,1), cf);
-                G = gauss_mle(X, [], cf);
+                G = pli_gauss_mle(X, [], cf);
             
                 assert(G.dim == G0.dim);
                 assert(G.num == G0.num);
@@ -47,7 +47,7 @@ classdef test_gauss_mle < mtest_case
             
             w = rand(n, m);
             G0 = test_gauss_mle.safe_mle(X, w, cf);
-            G = gauss_mle(X, w, cf);
+            G = pli_gauss_mle(X, w, cf);
             
             assert(G.dim == G0.dim);
             assert(G.num == G0.num);
@@ -71,7 +71,7 @@ classdef test_gauss_mle < mtest_case
             
             w = rand(n, m);
             G0 = test_gauss_mle.safe_mle(X, w, cf_t);
-            G = test_gauss_mle.safe_mle(X, w, cf_t);
+            G = pli_gauss_mle(X, w, cf_t);
             
             assert(G.dim == G0.dim);
             assert(G.num == G0.num);

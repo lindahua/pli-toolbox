@@ -1,12 +1,12 @@
-function L = gauss_logpdf(G, X, ldcov)
-%GAUSS_LOGPDF Evaluates log-pdf of Gaussian distribution(s).
+function L = pli_gauss_logpdf(G, X, ldcov)
+%PLI_GAUSS_LOGPDF Evaluates log-pdf of Gaussian distribution(s).
 %
-%   L = GAUSS_LOGPDF(G, X);
+%   L = PLI_GAUSS_LOGPDF(G, X);
 %
 %       Evaluates the log-pdf values at columns of X, with respect to
 %       the Gaussian distribution(s) in G.
 %
-%   L = GAUSS_LOGPDF(G, X, ldcov);
+%   L = PLI_GAUSS_LOGPDF(G, X, ldcov);
 %
 %       Evaluates the log-pdf values, with pre-computed log-determinants
 %       of the covariance matrix (or matrices).
@@ -34,13 +34,13 @@ function L = gauss_logpdf(G, X, ldcov)
 
 %% main
 
-sqD = gauss_mahdist(G, X, 'sq');
+sqD = pli_gauss_mahdist(G, X, 'sq');
 
 if nargin < 3
-    ldcov = gauss_logdet(G);
+    ldcov = pli_gauss_logdet(G);
 else    
     if ~(isscalar(ldcov) || isequal(size(ldcov), [G.num 1]))
-        error('gauss_mahdist:invalidarg', ...
+        error('pli_gauss_logpdf:invalidarg', ...
             'The size of ldcov is incorrect.');
     end
 end

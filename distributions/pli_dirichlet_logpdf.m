@@ -1,13 +1,13 @@
-function L = dirichlet_logpdf(alpha, X, lnB)
-%DIRICHLET_LOGPDF Log-pdf for Dirichlet distribution
+function L = pli_dirichlet_logpdf(alpha, X, lnB)
+%PLI_DIRICHLET_LOGPDF Log-pdf for Dirichlet distribution
 %
-%   L = dirichlet_logpdf(alpha, X);
+%   L = PLI_DIRICHLET_LOGPDF(alpha, X);
 %
 %       Evaluates the log-pdf at the columns of X with respect to 
 %       a Dirichlet distribution or multiple Dirichlet distributions 
 %       with parameter alpha.
 %
-%   L = dirichlet_logpdf(alpha, X, lnB);
+%   L = PLI_DIRICHLET_LOGPDF(alpha, X, lnB);
 %
 %       This statement also provides a pre-computed log-Beta value,
 %       which should be equal to mvbetaln(alpha).
@@ -20,10 +20,10 @@ m = size(alpha, 2);
 % get lnB
 
 if nargin < 3
-    lnB = mvbetaln(alpha);
+    lnB = pli_mvbetaln(alpha);
 else
     if ~(isfloat(lnB) && isreal(lnB) && numel(lnB) == m)
-        error('dirichlet_logpdf:invalidarg', ...
+        error('pli_dirichlet_logpdf:invalidarg', ...
             'lnB should be a real vector with length m.');
     end
 end

@@ -1,7 +1,7 @@
-function demo_gauss_mle()
-%DEMO_GAUSS_MLE A simple program to demonstrate the MLE of Gauss models
+function plidemo_gauss_mle()
+%PLIDEMO_GAUSS_MLE A simple program to demonstrate the MLE of Gauss models
 %
-%   DEMO_GAUSS_MLE
+%   PLIDEMO_GAUSS_MLE
 %
 
 %% Experiment configurations
@@ -20,9 +20,9 @@ X = bsxfun(@plus, T * randn(2, n), mu0);
 
 % estimate Gaussian distributions with different covariance forms
 
-Gs = gauss_mle(X, [], 's');
-Gd = gauss_mle(X, [], 'd');
-Gf = gauss_mle(X, [], 'f');
+Gs = pli_gauss_mle(X, [], 's');
+Gd = pli_gauss_mle(X, [], 'd');
+Gf = pli_gauss_mle(X, [], 'f');
 
 %% Display results
 
@@ -73,7 +73,7 @@ function show_gauss(G)
 npts = 1000;
 
 hold on;
-gauss2d_contour(G, 1, npts, 'r-');
+pli_gauss2d_contour(G, 1, npts, 'r-');
 hold on;
-gauss2d_contour(G, 2, npts, 'm-');
+pli_gauss2d_contour(G, 2, npts, 'm-');
 

@@ -1,12 +1,12 @@
-function [a, fval, converged] = dirichlet_mle(X, a0, varargin)
-%DIRICHLET_MLE Maximum likelihood estimation of Dirichlet distribution
+function [a, fval, converged] = pli_dirichlet_mle(X, a0, varargin)
+%PLI_DIRICHLET_MLE Maximum likelihood estimation of Dirichlet distribution
 %
-%   a = DIRICHLET_MLE(X, a0, ...);
+%   a = PLI_DIRICHLET_MLE(X, a0, ...);
 %
 %       Estimate the parameter of a Dirichlet distribution using 
 %       maximum likelihood estimation.
 %
-%   [a, fval, converged] = DIRICHLET_MLE(X, a, ...);
+%   [a, fval, converged] = PLI_DIRICHLET_MLE(X, a, ...);
 %
 %       Additionally returns information about the optimization.
 %
@@ -49,14 +49,14 @@ function [a, fval, converged] = dirichlet_mle(X, a0, varargin)
 %% argument checking
 
 if ~(isfloat(X) && isreal(X) && ismatrix(X))
-    error('dirichlet_mle:invalidarg', 'X should be a real matrix.');
+    error('pli_dirichlet_mle:invalidarg', 'X should be a real matrix.');
 end
 
 d = size(X, 1);
 n = size(X, 2);
 
 if ~(isfloat(a0) && isreal(a0) && isequal(size(a0), [d 1]))
-    error('dirichlet_mle:invalidarg', ...
+    error('pli_dirichlet_mle:invalidarg', ...
         'a0 should be a real column vector of length d.');
 end
 
@@ -65,7 +65,7 @@ opts = struct('is_log', false, 'weights', [], ...
     'verbose', false);
 
 if ~isempty(varargin)
-    opts = parse_opts(opts, varargin);
+    opts = pli_parseopts(opts, varargin);
 end
 
 
@@ -87,7 +87,7 @@ else
         ml = sum(L, 2) * (1 / size(L, 2));
     else
         if ~(isfloat(w) && isreal(w) && isequal(size(w), [n 1]))
-            error('dirichlet_mle:invalidarg', ...
+            error('pli_dirichlet_mle:invalidarg', ...
                 'weights should be either empty or an n x 1 real vector.');
         end        
         ml = (L * w) * (1 / sum(w));

@@ -1,4 +1,4 @@
-classdef gauss_model < pmodel_base
+classdef pli_gauss_model < pli_pmodel_base
     % Gaussian generative model
     
     properties
@@ -8,12 +8,12 @@ classdef gauss_model < pmodel_base
     
     methods
         
-        function obj = gauss_model(d, cf)
+        function obj = pli_gauss_model(d, cf)
             
             % verify arguments
             
             if ~(isscalar(d) && isreal(d) && d == fix(d) && d >= 1)
-                error('gauss_model:invalidarg', ...
+                error('pli_gauss_model:invalidarg', ...
                     'd should be a positive integer scalar.');
             end
             
@@ -27,7 +27,7 @@ classdef gauss_model < pmodel_base
             end
             
             if ~cform_ok
-                error('gauss_model:invalidarg', ...
+                error('pli_gauss_model:invalidarg', ...
                     'The value of cf is invalid.');
             end
             
@@ -48,11 +48,11 @@ classdef gauss_model < pmodel_base
                 if size(X, 1) == self.dim
                     n = size(X, 2);
                 else
-                    error('gauss_model:invalidarg', ...
+                    error('pli_gauss_model:invalidarg', ...
                         'The size of X is invalid.');
                 end
             else
-                error('gauss_model:invalidarg', ...
+                error('pli_gauss_model:invalidarg', ...
                     'X should be a real matrix.');
             end
         end

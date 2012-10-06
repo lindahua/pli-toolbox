@@ -1,7 +1,7 @@
-function v = dirichlet_var(alpha)
-%DIRICHLET_VAR Component variances of Dirichlet distribution
+function v = pli_dirichlet_var(alpha)
+%PLI_DIRICHLET_VAR Component variances of Dirichlet distribution
 %
-%   v = dirichlet_var(alpha)
+%   v = PLI_DIRICHLET_VAR(alpha)
 %
 %       Evaluates the variances of a Dirichlet distribution or
 %       multiple Dirichet distributions with parameter alpha.

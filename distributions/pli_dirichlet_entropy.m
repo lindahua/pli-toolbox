@@ -1,12 +1,12 @@
-function v = dirichlet_entropy(alpha, elog)
-%DIRICHLET_ENTROPY Evaluates the entropy of Dirichlet distribution
+function v = pli_dirichlet_entropy(alpha, elog)
+%PLI_DIRICHLET_ENTROPY Evaluates the entropy of Dirichlet distribution
 %
-%   v = DIRICHLET_ENTROPY(alpha);
+%   v = PLI_DIRICHLET_ENTROPY(alpha);
 %   
 %       Evaluates the entropy for a Dirichlet distribution or 
 %       multiple Dirichlet distributions, with parameter alpha.
 %
-%   v = DIRICHLET_ENTROPY(alpha, elog); 
+%   v = PLI_DIRICHLET_ENTROPY(alpha, elog); 
 %
 %       This statement allows the user to supply the pre-computed
 %       expectation of log(x). 

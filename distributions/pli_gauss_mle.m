@@ -1,17 +1,17 @@
-function G = gauss_mle(X, w, cform)
-%GAUSS_MLE Maximum likelihood estimation of Gaussian distribution(s)
+function G = pli_gauss_mle(X, w, cform)
+%PLI_GAUSS_MLE Maximum likelihood estimation of Gaussian distribution(s)
 %
-%   G = GAUSS_MLE(X);
+%   G = PLI_GAUSS_MLE(X);
 %       
 %       Maximum likelihood estimation of a Gaussian distribution.
 %           
-%   G = GAUSS_MLE(X, w);
+%   G = PLI_GAUSS_MLE(X, w);
 %
 %       Maximum likelihood estimation of a Gaussian distribution or
 %       a collection of Gaussian distribution(s) with weighted data.
 %
-%   G = GAUSS_MLE(X, [], cform);
-%   G = GAUSS_MLE(X, w, cform);
+%   G = PLI_GAUSS_MLE(X, [], cform);
+%   G = PLI_GAUSS_MLE(X, w, cform);
 %
 %       Maximum likelihood estimation using specified form of covariance.
 %
@@ -42,7 +42,7 @@ function G = gauss_mle(X, w, cform)
 %% argument checking
 
 if ~(isfloat(X) && isreal(X) && ismatrix(X))
-    error('gauss_mle:invalidarg', 'X should be a real matrix.');
+    error('pli_gauss_mle:invalidarg', 'X should be a real matrix.');
 end
 
 d = size(X, 1);
@@ -56,12 +56,12 @@ if nargin < 2 || isempty(w)
     
 else
     if ~(isfloat(w) && isreal(w) && ismatrix(w))
-        error('gauss_mle:invalidarg', ...
+        error('pli_gauss_mle:invalidarg', ...
             'w should be either empty or a real matrix.');
     end
     
     if size(w, 1) ~= n
-        error('gauss_mle:invalidarg', ...
+        error('pli_gauss_mle:invalidarg', ...
             'The sizes of X and w are inconsistent.');
     end
     
@@ -162,7 +162,7 @@ if len == 1
 elseif len == 6 && strcmp(cform(3:6), 'tied')
     tied = 1;
 else
-    error('gauss_mle:invalidarg', 'Invalid value for cform.');
+    error('pli_gauss_mle:invalidarg', 'Invalid value for cform.');
 end
 
 switch cform(1)
@@ -173,7 +173,7 @@ switch cform(1)
     case 'f'
         cf = 2;
     otherwise
-        error('gauss_mle:invalidarg', 'Invalid value for cform.');
+        error('pli_gauss_mle:invalidarg', 'Invalid value for cform.');
 end
 
 

@@ -1,24 +1,24 @@
-function gauss2d_contour(G, r, n, varargin)
-%GAUSS2D_CONTOUR Draws a Gaussian elliptic contour
+function pli_gauss2d_contour(G, r, n, varargin)
+%PLI_GAUSS2D_CONTOUR Draws a Gaussian elliptic contour
 %
-%   gauss2d_contour(G);
+%   PLI_GAUSS2D_CONTOUR(G);
 %       Draws a standard Gaussian contour (the points whose Mahalanobis
 %       distance to the center is 1).
 %
 %       When G.num > 1, it draws multiple contours, each for one
 %       distribution in G.
 %
-%   gauss2d_contour(G, r);
+%   PLI_GAUSS2D_CONTOUR(G, r);
 %       Draws a standard Gaussian contour, where the Malalanobis distance
 %       to the center is r.
 %
-%   gauss2d_contour(G, r, n);
+%   PLI_GAUSS2D_CONTOUR(G, r, n);
 %       n is the sample density (i.e. the number of samples lying 
 %       on the contour).
 %
 %       When n is omitted, it is set to 500 by default.
 %
-%   gauss2d_contour(G, r, n, ...);
+%   PLI_GAUSS2D_CONTOUR(G, r, n, ...);
 %
 %       One can further specify the line specification through ensuing
 %       arguments.
@@ -27,7 +27,7 @@ function gauss2d_contour(G, r, n, varargin)
 %% argument checking
 
 if ~(isstruct(G) && strcmp(G.tag, 'gauss') && G.dim == 2)
-    error('gauss2d_contour:invalidarg', ...
+    error('pli_gauss2d_contour:invalidarg', ...
         'G should be a Gaussian struct with G.dim == 2.');
 end
 
@@ -35,7 +35,7 @@ if nargin < 2
     r = 1;
 else
     if ~(isscalar(r) && isreal(r) && isfloat(r) && r > 0)
-        error('gauss2d_contour:invalidarg', ...
+        error('pli_gauss2d_contour:invalidarg', ...
             'r should be a positive real scalar.');
     end
 end
@@ -44,7 +44,7 @@ if nargin < 3
     n = 500;
 else
     if ~(isscalar(n) && isreal(n) && n == fix(n) && n > 1)
-        error('gauss2d_contour:invalidarg', ...
+        error('pli_gauss2d_contour:invalidarg', ...
             'n should be a positive integer scalar with n > 1.');
     end
 end

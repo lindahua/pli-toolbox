@@ -62,7 +62,7 @@ classdef test_gauss < mtest_case
                     cov = zeros(d, d, mc);                    
                     for k = 1 : mc
                         T = randn(d, d);
-                        C = add_diagonals(T * T', 1.0);
+                        C = pli_adddiag(T * T', 1.0);
                         cov(:,:,k) = C;
                     end
                     
@@ -72,9 +72,9 @@ classdef test_gauss < mtest_case
             end
             
             if tiecov
-                obj.gauss = make_gauss(d, mu, cov, 'tie_cov');
+                obj.gauss = pli_makegauss(d, mu, cov, 'tie_cov');
             else
-                obj.gauss = make_gauss(d, mu, cov);
+                obj.gauss = pli_makegauss(d, mu, cov);
             end
             
             obj.cov_mat = Cmat;
@@ -138,10 +138,10 @@ classdef test_gauss < mtest_case
 
             D0 = sqrt(sqD0);
             
-            sqD = gauss_mahdist(G, X, 'sq');
+            sqD = pli_gauss_mahdist(G, X, 'sq');
             assert(mtest_has_size(sqD, [m n]));
             
-            D = gauss_mahdist(G, X);
+            D = pli_gauss_mahdist(G, X);
             assert(mtest_has_size(D, [m n]));           
             
             assert(mtest_is_approx(sqD, sqD0, 1.0e-10));
@@ -161,15 +161,15 @@ classdef test_gauss < mtest_case
             end
             
             if mc == 1
-                v0 = pdm_logdet(Cmat);
+                v0 = pli_logdet(Cmat);
             else
                 v0 = zeros(mc, 1);
                 for k = 1 : mc
-                    v0(k) = pdm_logdet(Cmat(:,:,k));
+                    v0(k) = pli_logdet(Cmat(:,:,k));
                 end
             end
             
-            v = gauss_logdet(G);
+            v = pli_gauss_logdet(G);
             
             assert(mtest_has_size(v, [mc 1]));
             assert(mtest_is_approx(v, v0, 1.0e-10));
@@ -205,7 +205,7 @@ classdef test_gauss < mtest_case
                 end
             end   
             
-            L = gauss_logpdf(G, X);
+            L = pli_gauss_logpdf(G, X);
             assert(mtest_has_size(L, [m n]));
             
             assert(mtest_is_approx(L, L0, 1.0e-10));
@@ -238,7 +238,7 @@ classdef test_gauss < mtest_case
             
             d = size(X, 1);
             sqD = test_gauss.safe_sqmahdist(X, mu, C);
-            ldcov = pdm_logdet(C);
+            ldcov = pli_logdet(C);
             
             v = (-0.5) * (sqD + (d * log(2*pi) + ldcov));            
         end        

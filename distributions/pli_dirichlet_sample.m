@@ -1,7 +1,7 @@
-function X = dirichlet_sample(alpha, n)
-%DIRICHLET_SAMPLE Sample from a Dirichlet distribution
+function X = pli_dirichlet_sample(alpha, n)
+%PLI_DIRICHLET_SAMPLE Sample from a Dirichlet distribution
 %
-%   X = dirichlet_sample(alpha, n);
+%   X = PLI_DIRICHLET_SAMPLE(alpha, n);
 %       
 %       Draws n samples from a Dirichlet distribution with parameter
 %       alpha.
@@ -10,7 +10,7 @@ function X = dirichlet_sample(alpha, n)
 %% argument checking
 
 if ~(isfloat(alpha) && isreal(alpha) && size(alpha, 2) == 1)    
-    error('dirichlet_sample:invalidarg', ...
+    error('pli_dirichlet_sample:invalidarg', ...
         'alpha should be a real column vector.');
 end
 

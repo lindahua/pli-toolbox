@@ -1,13 +1,13 @@
-function D = gauss_mahdist(G, X, op)
-%GAUSS_MAHDIST Evaluates Mahalanobis distances to Gaussian center(s)
+function D = pli_gauss_mahdist(G, X, op)
+%PLI_GAUSS_MAHDIST Evaluates Mahalanobis distances to Gaussian center(s)
 %
-%   D = GAUSS_MAHDIST(G, X);
+%   D = PLI_GAUSS_MAHDIST(G, X);
 %
 %       Evaluates the Mahalanobis distances from columns of X to 
 %       the centers of the Gaussian distribution(s) in G, with 
 %       respect to the corresponding covariance(s).
 %
-%   D = GAUSS_MAHDIST(G, X, 'sq');
+%   D = PLI_GAUSS_MAHDIST(G, X, 'sq');
 %
 %       Evaluates the squared Mahalanobis distances.
 %
@@ -29,14 +29,14 @@ function D = gauss_mahdist(G, X, op)
 %% argument checking
 
 if ~(isstruct(G) && strcmp(G.tag, 'gauss'))
-    error('gauss_mahdist:invalidarg', ...
+    error('pli_gauss_mahdist:invalidarg', ...
         'G must be a Gaussian struct.');
 end
 
 d = G.dim;
 
 if ~(isfloat(X) && isreal(X) && ismatrix(X) && size(X,1) == d)
-    error('gauss_mahdist:invalidarg', ...
+    error('pli_gauss_mahdist:invalidarg', ...
         'X must be a real matrix with size(X,1) == d.');
 end
 
@@ -44,7 +44,7 @@ if nargin < 3
     sq = 0;
 else
     if ~strcmpi(op, 'sq')
-        error('gauss_mahdist:invalidarg', ...
+        error('pli_gauss_mahdist:invalidarg', ...
             'The third input argument is not recognized.');
     end
     sq = 1;

@@ -1,7 +1,7 @@
-function v = gauss_logdet(G)
-%GAUSS_LOGDET Log-determinant of Gaussian covariance
+function v = pli_gauss_logdet(G)
+%PLI_GAUSS_LOGDET Log-determinant of Gaussian covariance
 %
-%   v = gauss_logdet(G);
+%   v = PLI_GAUSS_LOGDET(G);
 %
 %       Evaluates the log-determinant of the covariance(s) in G.
 %
@@ -30,12 +30,12 @@ switch G.cform
         end
     case 2
         if ismatrix(cov)
-            v = pdm_logdet(cov);
+            v = pli_logdet(cov);
         else
             m = G.num;
             v = zeros(m, 1);
             for k = 1 : m
-                v(k) = pdm_logdet(cov(:,:,k));
+                v(k) = pli_logdet(cov(:,:,k));
             end
         end
 end
