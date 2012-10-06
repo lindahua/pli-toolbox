@@ -17,27 +17,27 @@ classdef test_pw_euclidean < mtest_case
         
         function test_sqeucdist(self)
             D0 = self.safe_sqdist(self.X, self.Y);
-            D = pw_euclidean(self.X, self.Y, 'sq');
+            D = pli_pw_euclidean(self.X, self.Y, 'sq');
             assert( mtest_is_approx(D, D0) );          
         end
         
         function test_sqeucdist_selfpw(self)
             D0 = self.safe_sqdist(self.X, self.X);
-            D = pw_euclidean(self.X, [], 'sq');
+            D = pli_pw_euclidean(self.X, [], 'sq');
             assert( mtest_is_approx(D, D0) );          
         end
                 
         function test_eucdist(self)
             D0 = self.safe_sqdist(self.X, self.Y);
             D0 = sqrt(D0);
-            D = pw_euclidean(self.X, self.Y);
+            D = pli_pw_euclidean(self.X, self.Y);
             assert( mtest_is_approx(D, D0) );          
         end
         
         function test_eucdist_selfpw(self)
             D0 = self.safe_sqdist(self.X, self.X);
             D0 = sqrt(D0);
-            D = pw_euclidean(self.X);
+            D = pli_pw_euclidean(self.X);
             assert( mtest_is_approx(D, D0) );          
         end
     end

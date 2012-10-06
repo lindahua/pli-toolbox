@@ -1,18 +1,18 @@
-function D = pw_qdist(X, Y, Q, op)
-%PW_QDIST Pairwise quadratic distances
+function D = pli_pw_qdist(X, Y, Q, op)
+%PLI_PW_QDIST Pairwise quadratic distances
 %
-%   D = PW_QDIST(X, [], Q);
+%   D = PLI_PW_QDIST(X, [], Q);
 %       
 %       Evaluates pairwise quadratic distances between the columns
 %       in X.
 %
-%   D = PW_QDIST(X, Y, Q);
+%   D = PLI_PW_QDIST(X, Y, Q);
 %
 %       Evaluates pairwise quadraic distances between the columns in 
 %       X and Y. When Y is empty, it computes the 
 %
-%   D = PW_QDIST(X, [], Q, 'sq');
-%   D = PW_QDIST(X, Y, Q, 'sq');
+%   D = PLI_PW_QDIST(X, [], Q, 'sq');
+%   D = PLI_PW_QDIST(X, Y, Q, 'sq');
 %
 %       Evaluates squared pairwise quadratic distances.
 %
@@ -25,7 +25,7 @@ function D = pw_qdist(X, Y, Q, op)
 %% argument checking
 
 if ~(ismatrix(X) && isreal(X))
-    error('pw_qdist:invalidarg', 'X should be a real matrix.');
+    error('pli_pw_qdist:invalidarg', 'X should be a real matrix.');
 end
 
 if isempty(Y)
@@ -33,17 +33,17 @@ if isempty(Y)
 else
     with_self = 0;
     if ~(ismatrix(Y) && isreal(Y))
-        error('pw_qdist:invalidarg', 'Y must be a real matrix.');
+        error('pli_pw_qdist:invalidarg', 'Y must be a real matrix.');
     end
 end
 
-[~, f] = check_smat(Q);
+[~, f] = pli_chksmat(Q);
 
 if nargin < 4
     sq = 0;
 else
     if ~strcmpi(op, 'sq')
-        error('pw_qdist:invalidarg', ...
+        error('pli_pw_qdist:invalidarg', ...
             'The third input argument is not recognized.');
     end
     sq = 1;

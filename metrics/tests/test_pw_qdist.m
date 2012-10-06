@@ -1,5 +1,5 @@
 classdef test_pw_qdist < mtest_case
-    % Unit testing of pw_qdist
+    % Unit testing of pli_pw_qdist
     
     properties
         dim
@@ -25,7 +25,7 @@ classdef test_pw_qdist < mtest_case
                 obj.Qmat = diag(obj.Q);
             else
                 T = randn(d, d);
-                obj.Q = add_diagonals(T * T', 0.5);
+                obj.Q = pli_adddiag(T * T', 0.5);
                 obj.Qmat = obj.Q;
             end
                                     
@@ -40,27 +40,27 @@ classdef test_pw_qdist < mtest_case
         
         function test_qdist_sq(self)
             D0 = self.safe_sqdist(self.Qmat, self.X, self.Y);
-            D = pw_qdist(self.X, self.Y, self.Q, 'sq');
+            D = pli_pw_qdist(self.X, self.Y, self.Q, 'sq');
             assert( mtest_is_approx(D, D0) );          
         end
         
         function test_qdist_sq_selfpw(self)
             D0 = self.safe_sqdist(self.Qmat, self.X, self.X);
-            D = pw_qdist(self.X, [], self.Q, 'sq');
+            D = pli_pw_qdist(self.X, [], self.Q, 'sq');
             assert( mtest_is_approx(D, D0) );          
         end
                 
         function test_qdist(self)
             D0 = self.safe_sqdist(self.Qmat, self.X, self.Y);
             D0 = sqrt(D0);
-            D = pw_qdist(self.X, self.Y, self.Q);
+            D = pli_pw_qdist(self.X, self.Y, self.Q);
             assert( mtest_is_approx(D, D0) );          
         end
         
         function test_qdist_selfpw(self)
             D0 = self.safe_sqdist(self.Qmat, self.X, self.X);
             D0 = sqrt(D0);
-            D = pw_qdist(self.X, [], self.Q);
+            D = pli_pw_qdist(self.X, [], self.Q);
             assert( mtest_is_approx(D, D0) );          
         end
     end

@@ -18,13 +18,13 @@ classdef test_pw_hamming < mtest_case
         
         function test_hamming(self)
             D0 = self.safe_dist(self.X, self.Y);
-            D = pw_hamming(self.X, self.Y);
+            D = pli_pw_hamming(self.X, self.Y);
             assert( isequal(D, D0) );          
         end
         
         function test_hamming_selfpw(self)
             D0 = self.safe_dist(self.X, self.X);
-            D = pw_hamming(self.X);
+            D = pli_pw_hamming(self.X);
             assert( isequal(D, D0) );          
         end
     end

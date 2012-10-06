@@ -17,13 +17,13 @@ classdef test_pw_chebyshev < mtest_case
         
         function test_chebyshev(self)
             D0 = self.safe_dist(self.X, self.Y);
-            D = pw_chebyshev(self.X, self.Y);
+            D = pli_pw_chebyshev(self.X, self.Y);
             assert( mtest_is_approx(D, D0) );          
         end
         
         function test_chebyshev_selfpw(self)
             D0 = self.safe_dist(self.X, self.X);
-            D = pw_chebyshev(self.X);
+            D = pli_pw_chebyshev(self.X);
             assert( mtest_is_approx(D, D0) );          
         end
     end

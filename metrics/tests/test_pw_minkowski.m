@@ -23,13 +23,13 @@ classdef test_pw_minkowski < mtest_case
         
         function test_minkowski(self)
             D0 = self.safe_dist(self.X, self.Y, self.p);
-            D = pw_minkowski(self.X, self.Y, self.p);
+            D = pli_pw_minkowski(self.X, self.Y, self.p);
             assert( mtest_is_approx(D, D0) );          
         end
         
         function test_minkowski_selfpw(self)
             D0 = self.safe_dist(self.X, self.X, self.p);
-            D = pw_minkowski(self.X, [], self.p);
+            D = pli_pw_minkowski(self.X, [], self.p);
             assert( mtest_is_approx(D, D0) );          
         end
     end

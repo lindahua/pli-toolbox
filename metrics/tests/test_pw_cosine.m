@@ -17,13 +17,13 @@ classdef test_pw_cosine < mtest_case
         
         function test_cosine(self)
             D0 = self.safe_dist(self.X, self.Y);
-            D = pw_cosine(self.X, self.Y);
+            D = pli_pw_cosine(self.X, self.Y);
             assert( mtest_is_approx(D, D0) );          
         end
         
         function test_cosine_selfpw(self)
             D0 = self.safe_dist(self.X, self.X);
-            D = pw_cosine(self.X);
+            D = pli_pw_cosine(self.X);
             assert( mtest_is_approx(D, D0) );          
         end
     end

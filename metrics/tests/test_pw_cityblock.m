@@ -17,13 +17,13 @@ classdef test_pw_cityblock < mtest_case
         
         function test_cityblock(self)
             D0 = self.safe_dist(self.X, self.Y);
-            D = pw_cityblock(self.X, self.Y);
+            D = pli_pw_cityblock(self.X, self.Y);
             assert( mtest_is_approx(D, D0) );          
         end
         
         function test_cityblock_selfpw(self)
             D0 = self.safe_dist(self.X, self.X);
-            D = pw_cityblock(self.X);
+            D = pli_pw_cityblock(self.X);
             assert( mtest_is_approx(D, D0) );          
         end
     end

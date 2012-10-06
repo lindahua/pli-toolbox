@@ -1,18 +1,18 @@
-function D = pw_mahdist(X, Y, C, op)
-%PW_MAHDIST Pairwise Mahalanobis distances
+function D = pli_pw_mahdist(X, Y, C, op)
+%PLI_PW_MAHDIST Pairwise Mahalanobis distances
 %
-%   D = PW_MAHDIST(X, [], C);
+%   D = PLI_PW_MAHDIST(X, [], C);
 %       
 %       Evaluates pairwise Mahalanobis distances between the columns
 %       in X, with respect to C, a given covariance.
 %
-%   D = PW_MAHDIST(X, Y, C);
+%   D = PLI_PW_MAHDIST(X, Y, C);
 %
 %       Evaluates pairwise Mahalanobis distances between the columns in 
 %       X and Y. When Y is empty, it computes the 
 %
-%   D = PW_MAHDIST(X, [], C, 'sq');
-%   D = PW_MAHDIST(X, Y, C, 'sq');
+%   D = PLI_PW_MAHDIST(X, [], C, 'sq');
+%   D = PLI_PW_MAHDIST(X, Y, C, 'sq');
 %
 %       Evaluates squared pairwise Mahalanobis distances.
 %
@@ -25,7 +25,7 @@ function D = pw_mahdist(X, Y, C, op)
 %% argument checking
 
 if ~(ismatrix(X) && isreal(X))
-    error('pw_mahdist:invalidarg', 'X should be a real matrix.');
+    error('pli_pw_mahdist:invalidarg', 'X should be a real matrix.');
 end
 
 if isempty(Y)
@@ -33,17 +33,17 @@ if isempty(Y)
 else
     with_self = 0;
     if ~(ismatrix(Y) && isreal(Y))
-        error('pw_mahdist:invalidarg', 'Y must be a real matrix.');
+        error('pli_pw_mahdist:invalidarg', 'Y must be a real matrix.');
     end
 end
 
-[~, f] = check_smat(C);
+[~, f] = pli_chksmat(C);
 
 if nargin < 4
     sq = 0;
 else
     if ~strcmpi(op, 'sq')
-        error('pw_mahdist:invalidarg', ...
+        error('pli_pw_mahdist:invalidarg', ...
             'The third input argument is not recognized.');
     end
     sq = 1;
