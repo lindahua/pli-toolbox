@@ -28,7 +28,7 @@ classdef test_aggregx < mtest_case
                 A0(k) = sum(X_(I == k));
             end
             
-            A = aggregx(K, X_, I);
+            A = pli_aggregx(K, X_, I);
             
             assert( isequal(A, A0) );
         end        
@@ -49,7 +49,7 @@ classdef test_aggregx < mtest_case
                 A0(k) = v;
             end
             
-            A = aggregx(K, X_, I, 'max');
+            A = pli_aggregx(K, X_, I, 'max');
             assert( isequal(A, A0) );
         end
                         
@@ -69,7 +69,7 @@ classdef test_aggregx < mtest_case
                 A0(k) = v;
             end
             
-            A = aggregx(K, X_, I, 'min');
+            A = pli_aggregx(K, X_, I, 'min');
             
             assert( isequal(A, A0) );
         end
@@ -87,7 +87,7 @@ classdef test_aggregx < mtest_case
                 A0(k, :) = sum(X_(I == k, :), 1);
             end
             
-            A = aggregx(K, X_, I);
+            A = pli_aggregx(K, X_, I);
             
             assert( isequal(A, A0) );
         end
@@ -108,7 +108,7 @@ classdef test_aggregx < mtest_case
                 A0(k, :) = v;
             end
             
-            A = aggregx(K, X_, I, 'max');
+            A = pli_aggregx(K, X_, I, 'max');
             
             assert( isequal(A, A0) );
         end
@@ -129,7 +129,7 @@ classdef test_aggregx < mtest_case
                 A0(k, :) = v;
             end
             
-            A = aggregx(K, X_, I, 'min');
+            A = pli_aggregx(K, X_, I, 'min');
             
             assert( isequal(A, A0) );
         end
@@ -147,7 +147,7 @@ classdef test_aggregx < mtest_case
                 A0(:, k) = sum(X_(:, I==k), 2);
             end
             
-            A = aggregx(K, X_, I);            
+            A = pli_aggregx(K, X_, I);            
             assert( isequal(A, A0) );
         end
                 
@@ -167,7 +167,7 @@ classdef test_aggregx < mtest_case
                 A0(:, k) = v;
             end
             
-            A = aggregx(K, X_, I, 'max');
+            A = pli_aggregx(K, X_, I, 'max');
             
             assert( isequal(A, A0) );
         end
@@ -188,7 +188,7 @@ classdef test_aggregx < mtest_case
                 A0(:, k) = v;
             end
             
-            A = aggregx(K, X_, I, 'min');
+            A = pli_aggregx(K, X_, I, 'min');
             
             assert( isequal(A, A0) );
         end        

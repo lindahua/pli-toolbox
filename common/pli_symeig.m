@@ -1,7 +1,7 @@
-function [U, evs] = symeig(C)
-%SYMEIG Eigen-analysis on symmetric matrix
+function [U, evs] = pli_symeig(C)
+%PLI_SYMEIG Eigen-analysis on symmetric matrix
 %
-%   [U, evs] = SYMEIG(C);
+%   [U, evs] = PLI_SYMEIG(C);
 %
 %       This is a simple wrapper of the builtin function eig. 
 %       It returns the outputs in a form that is convenient for 

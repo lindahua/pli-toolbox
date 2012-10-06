@@ -1,4 +1,4 @@
-classdef test_find_bin < mtest_case
+classdef test_findbin < mtest_case
     
     methods
         
@@ -7,8 +7,8 @@ classdef test_find_bin < mtest_case
             e = [5, 13, 25];
             x = randi(30, [n 1]);
             
-            r = find_bin(e, x);
-            r0 = test_find_bin.find_bin_safe(e, x);
+            r = pli_findbin(e, x);
+            r0 = test_findbin.find_bin_safe(e, x);
             
             assert( isequal(r, r0) );
             
@@ -20,8 +20,8 @@ classdef test_find_bin < mtest_case
             x = randi(30, [n 1]);
             x = sort(x);
             
-            r = find_bin(e, x, true);
-            r0 = test_find_bin.find_bin_safe(e, x);
+            r = pli_findbin(e, x, true);
+            r0 = test_findbin.find_bin_safe(e, x);
             
             assert( isequal(r, r0) );
         end

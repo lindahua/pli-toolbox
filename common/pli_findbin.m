@@ -1,7 +1,7 @@
-function r = find_bin(edges, x, is_sorted)
-%FIND_BIN Finds bin indices for given values
+function r = pli_findbin(edges, x, is_sorted)
+%PLI_FINDBIN Finds bin indices for given values
 %
-%   r = FIND_BIN(edges, x);
+%   r = PLI_FINDBIN(edges, x);
 %
 %       Consider a series of bins delimited by the edges, then the
 %       bin index for a value x is i, when edges(i) <= x < edges(i+1).
@@ -13,7 +13,7 @@ function r = find_bin(edges, x, is_sorted)
 %       The input x can be a matrix, and r will be a matrix of the same
 %       size. The class r is int32.
 %
-%   r = FIND_BIN(edges, x, is_sorted);
+%   r = PLI_FINDBIN(edges, x, is_sorted);
 %
 %       Specify whether x is sorted in ascending order. If this is the
 %       case, the function will use a faster algorithm (O(n+K)) to find
@@ -27,12 +27,12 @@ function r = find_bin(edges, x, is_sorted)
 
 if ~(isnumeric(edges) && isreal(edges) && isvector(edges) && ...
         numel(edges) >= 2)
-    error('find_bin:invalidarg', ...
+    error('pli_findbin:invalidarg', ...
         'edges should be a real vector with at least two elements.');    
 end
 
 if ~(isnumeric(x) && isreal(x) && ismatrix(x))
-    error('find_bin:invalidarg', 'x should be a real matrix.');
+    error('pli_findbin:invalidarg', 'x should be a real matrix.');
 end
 
 if ~isa(x, class(edges))
@@ -43,12 +43,12 @@ if nargin < 3
     is_sorted = false;
 else
     if ~isscalar(is_sorted)
-        error('find_bin:invalidarg', 'is_sorted should be a scalar.');
+        error('pli_findbin:invalidarg', 'is_sorted should be a scalar.');
     end
 end
 
 
 %% main
 
-r = find_bin_cimp(edges, x, logical(is_sorted));
+r = findbin_cimp(edges, x, logical(is_sorted));
 

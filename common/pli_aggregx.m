@@ -1,7 +1,7 @@
-function A = aggregx(K, vals, I, op)
-%AGGREGX Aggregation according to subscripts
+function A = pli_aggregx(K, vals, I, op)
+%PLI_AGGREGX Aggregation according to subscripts
 %
-%   A = AGGREGX(K, vals, I)
+%   A = PLI_AGGREGX(K, vals, I)
 %
 %       Accumulates the scalars/vectors in vals according to corresponding
 %       indices given in I.
@@ -26,7 +26,7 @@ function A = aggregx(K, vals, I, op)
 %
 %           A(:,k) = sum(vals(:, I == k), 2).
 %
-%   A = AGGREGX(K, vals, I, op)
+%   A = PLI_AGGREGX(K, vals, I, op)
 %
 %       Uses the argument op to specify the type of accumulation to 
 %       perform. Here, op can be 'sum', 'max', or 'min'. When op
@@ -46,22 +46,22 @@ else
         case 'min'
             op_code = 2;
         otherwise
-            error('aggregx:invalidarg', 'Invalid value for op.');
+            error('pli_aggregx:invalidarg', 'Invalid value for op.');
     end
 end
 
 if ~(isfloat(vals) && isreal(vals) && ismatrix(vals) && ~issparse(vals))
-    error('aggregx:invalidarg', ...
+    error('pli_aggregx:invalidarg', ...
         'vals should be a non-sparse real matrix.');
 end
 
 K = int32(K);    
 if K <= 0
-    error('aggregx:invalidarg', 'K should be a positive integer.');
+    error('pli_aggregx:invalidarg', 'K should be a positive integer.');
 end
 
 if ~(isnumeric(I) && isreal(I) && ismatrix(I) && ~issparse(I))
-    error('aggregx:invalidarg', ...
+    error('pli_aggregx:invalidarg', ...
         'I should be a non-sparse numeric matrix.');
 end
 

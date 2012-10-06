@@ -178,7 +178,7 @@ classdef test_aggreg2 < mtest_case
             
             % run function
             
-            A = aggreg2([K_, L_], X_, I, J, op);
+            A = pli_aggreg2([K_, L_], X_, I, J, op);
             
             % verify
             

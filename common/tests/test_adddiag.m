@@ -1,5 +1,5 @@
-classdef test_add_diagonals < mtest_case
-    % Unit-testing of add_diagonals
+classdef test_adddiag < mtest_case
+    % Unit-testing of pli_adddiag
     %
     
     properties
@@ -8,7 +8,7 @@ classdef test_add_diagonals < mtest_case
     
     methods
         
-        function obj = test_add_diagonals(m, n)
+        function obj = test_adddiag(m, n)
             obj.A = reshape(1:m*n, m, n);
         end
         
@@ -20,7 +20,7 @@ classdef test_add_diagonals < mtest_case
         
         function test_add_scalar(self)
             v = 2;
-            R = add_diagonals(self.A, v);
+            R = pli_adddiag(self.A, v);
             R0 = self.safe_result(v);
             
             assert( isequal(R, R0) );
@@ -30,7 +30,7 @@ classdef test_add_diagonals < mtest_case
             n = min(size(self.A));
             v = 1 : n;
             
-            R = add_diagonals(self.A, v);
+            R = pli_adddiag(self.A, v);
             R0 = self.safe_result(v);
             
             assert( isequal(R, R0) );

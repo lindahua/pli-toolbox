@@ -1,7 +1,7 @@
-function C = intcount(rgn, I, J)
-%INTCOUNT Integer counting
+function C = pli_intcount(rgn, I, J)
+%PLI_INTCOUNT Integer counting
 %
-%   C = INTCOUNT(m, I);
+%   C = PLI_INTCOUNT(m, I);
 %
 %       Counts the number of times each integer in [1, m] appear in I.
 %
@@ -9,7 +9,7 @@ function C = intcount(rgn, I, J)
 %
 %           C(i) = sum(I(:) == i).
 %
-%   C = INTCOUNT([m, n], I, J);
+%   C = PLI_INTCOUNT([m, n], I, J);
 %
 %       Counts the number of times each pair in [1, m] x [1, n] appear
 %       in I and J.
@@ -26,7 +26,7 @@ function C = intcount(rgn, I, J)
 %% argument checking
 
 if ~(isnumeric(rgn) && isreal(rgn))
-    error('intcount:invalidarg', ...
+    error('pli_intcount:invalidarg', ...
         'The first argument should be numeric.');
 end
 
@@ -40,23 +40,23 @@ elseif numel(rgn) == 2
     n = int32(rgn(2));
     
 else
-    error('intcount:invalidarg', ...
+    error('pli_intcount:invalidarg', ...
         'The first argument is invalid.');
 end    
 
 if ~(isnumeric(I) && isreal(I) && ~issparse(I))
-    error('intcount:invalidarg', ...
+    error('pli_intcount:invalidarg', ...
         'I should be a non-sparse real array.');
 end
 
 if nd == 2
     if ~(isnumeric(J) && isreal(J) && ~issparse(J))            
-        error('intcount:invalidarg', ...
+        error('pli_intcount:invalidarg', ...
             'J should be a non-sparse real array.');
     end
 
     if numel(I) ~= numel(J)
-        error('intcount:invalidarg', ...
+        error('pli_intcount:invalidarg', ...
             'I and J should be of the same size.');
     end
     

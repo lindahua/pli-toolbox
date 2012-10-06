@@ -1,7 +1,7 @@
-function [sx, b, e, gs] = idxgroup(K, labels)
-%IDXGROUP Group indices according to labels
+function [sx, b, e, gs] = pli_idxgroup(K, labels)
+%PLI_IDXGROUP Group indices according to labels
 %
-%   [sx, b, e] = IDXGROUP(K, labels)
+%   [sx, b, e] = PLI_IDXGROUP(K, labels)
 %
 %       Group indices according to their labels. 
 %
@@ -21,7 +21,7 @@ function [sx, b, e, gs] = idxgroup(K, labels)
 %       then those values are not counted, and numel(sx) may be smaller
 %       than numel(labels).
 %
-%   [sx, b, e, gs] = IDXGROUP(K, labels)      
+%   [sx, b, e, gs] = PLI_IDXGROUP(K, labels)      
 %
 %       Additionally returns a cell array gs, where gs{k} is
 %       sx(b(k):e(k)). When b(k) > e(k), gs{k} is empty.
@@ -35,7 +35,7 @@ function [sx, b, e, gs] = idxgroup(K, labels)
 %       labels be a vector of length n, then to process the samples
 %       in X group-by-group, one can write
 %
-%       [sx, b, e] = IDXGROUP(K, labels);
+%       [sx, b, e] = PLI_IDXGROUP(K, labels);
 %       for k = 1 : K
 %           Xk = X(:, b(k):e(k));  % Xk is the k-th group of samples
 %           ... process Xk ....
@@ -45,14 +45,14 @@ function [sx, b, e, gs] = idxgroup(K, labels)
 %% argument checking
 
 if ~(isnumeric(K) && isreal(K) && isscalar(K) && K >= 1)
-    error('idxgroup:invalidarg', 'K should be a positive integer.');
+    error('pli_idxgroup:invalidarg', 'K should be a positive integer.');
 end
 K = int32(K);
 
 if ~(isnumeric(labels) && isreal(labels) && isvector(labels) && ...
         ~issparse(labels))
     
-    error('idxgroup:invalidarg', ...
+    error('pli_idxgroup:invalidarg', ...
         'labels should be a non-sparse numeric vector.');
 end
 

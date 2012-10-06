@@ -1,7 +1,7 @@
-function A = aggreg2(siz, vals, I, J, op)
-%AGGREG2 Aggregation according to row and column indices
+function A = pli_aggreg2(siz, vals, I, J, op)
+%PLI_AGGREG2 Aggregation according to row and column indices
 %
-%   A = AGGREG2(siz, vals, I, J)
+%   A = PLI_AGGREG2(siz, vals, I, J)
 %
 %       Accumulates the values in vals to the entries of A, according 
 %       to the subscripts given in I and J.
@@ -20,7 +20,7 @@ function A = aggreg2(siz, vals, I, J, op)
 %       J can also be [m, 1] or [1, n]. Note that I and J need not be
 %       of the same size. 
 %
-%   A = AGGREG2(siz, vals, I, J, op)
+%   A = PLI_AGGREG2(siz, vals, I, J, op)
 %
 %       Uses the argument op to specify the type of accumulation to 
 %       perform. Here, op can be 'sum', 'max', or 'min'. When op
@@ -34,20 +34,20 @@ am = int32(siz(1));
 an = int32(siz(2));
 
 if ~(am >= 1 || an >= 1)
-    error('aggreg2:invalidarg', 'The value of siz is invalid.');
+    error('pli_aggreg2:invalidarg', 'The value of siz is invalid.');
 end
 
 if ~(isfloat(vals) && isreal(vals) && ~issparse(vals))
-    error('aggreg2:invalidarg', ...
+    error('pli_aggreg2:invalidarg', ...
         'vals should be a non-sparse real matrix.');
 end
 
 if ~(isnumeric(I) && isreal(I) && ismatrix(I))
-    error('aggreg2:invalidarg', 'I should be a numeric matrix.');
+    error('pli_aggreg2:invalidarg', 'I should be a numeric matrix.');
 end
 
 if ~(isnumeric(J) && isreal(J) && ismatrix(J))
-    error('aggreg2:invalidarg', 'J should be a numeric matrix.');
+    error('pli_aggreg2:invalidarg', 'J should be a numeric matrix.');
 end
 
 if nargin < 5
@@ -61,7 +61,7 @@ else
         case 'min'
             op_code = 2;
         otherwise
-            error('aggreg2:invalidarg', 'Invalid value for op.');
+            error('pli_aggreg2:invalidarg', 'Invalid value for op.');
     end
 end
 

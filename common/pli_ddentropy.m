@@ -1,8 +1,8 @@
-function v = ddentropy(P, dim)
+function v = pli_ddentropy(P, dim)
 %DDENTROPY Entropy of discrete distribution
 %
-%   v = DDENTROPY(P);
-%   v = DDENTROPY(P, dim);
+%   v = PLI_DDENTROPY(P);
+%   v = PLI_DDENTROPY(P, dim);
 %
 %       Evaluates the entropy of the probability distribution along
 %       the specified dimension. If dim is not given, it is along

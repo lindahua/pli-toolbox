@@ -1,7 +1,7 @@
-function x = sample_wor(m, n)
-%SAMPLE_WOR Random sampling without replacement
+function x = pli_samplewor(m, n)
+%PLI_SAMPLEWOR Random sampling without replacement
 %
-%   x = SAMPLE_WOR(m, n)
+%   x = PLI_SAMPLEWOR(m, n)
 %
 %       Draws n integers from 1:m without replacement. 
 %       
@@ -13,11 +13,11 @@ function x = sample_wor(m, n)
 %% argument checking
 
 if ~(isreal(m) && isscalar(m) && m > 0)
-    error('sample_wor:invalidarg', 'm should be a positive scalar.');
+    error('pli_samplewor:invalidarg', 'm should be a positive scalar.');
 end
 
 if ~(isreal(n) && isscalar(n) && n > 0 && n <= m)
-    error('sample_wor:invalidarg', ...
+    error('pli_samplewor:invalidarg', ...
         'n should be a positive scalar with n <= m.');
 end
 

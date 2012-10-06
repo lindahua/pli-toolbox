@@ -1,12 +1,12 @@
-function [sol, objv, t, converged] = iter_optimize(op, objfun, updatefun, sol, varargin)
-%ITER_OPTIMIZE Optimize via iterative updating
+function [sol, objv, t, converged] = pli_iteroptim(op, objfun, updatefun, sol, varargin)
+%PLI_ITEROPTIM Optimize via iterative updating
 %
-%   sol = ITER_OPTIMIZE('maximize', objfun, updatefun, sol, ...);
-%   sol = ITER_OPTIMIZE('minimize', objfun, updatefun, sol, ...);
+%   sol = PLI_ITEROPTIM('maximize', objfun, updatefun, sol, ...);
+%   sol = PLI_ITEROPTIM('minimize', objfun, updatefun, sol, ...);
 %
 %       Optimizes a given solution through iterative updating.
 %
-%   sol, objv, t, converged = ITER_OPTIMIZE( ... );
+%   sol, objv, t, converged = PLI_ITEROPTIM( ... );
 %       
 %   Arguments
 %   ---------
@@ -49,17 +49,17 @@ if strcmpi(op, 'maximize')
 elseif strcmpi(op, 'minimize')
     optim_dir = -1;
 else
-    error('iter_optimize:invalidarg', ...
+    error('pli_iteroptim:invalidarg', ...
         'The first argument is invalid.');
 end
 
 if ~isa(objfun, 'function_handle')
-    error('iter_optimize:invalidarg', ...
+    error('pli_iteroptim:invalidarg', ...
         'objfun must be a function handle.');
 end
 
 if ~isa(updatefun, 'function_handle')
-    error('iter_optimize:invalidarg', ...
+    error('pli_iteroptim:invalidarg', ...
         'updatefun must be a function handle.');
 end
 
@@ -147,7 +147,7 @@ S = struct( ...
     'display', 'off');
 
 if ~isempty(oplist)
-    S = parse_opts(S, oplist);
+    S = pli_parseopts(S, oplist);
 end
 
 maxiter = S.maxiter;
@@ -162,7 +162,7 @@ switch S.display
     case 'iter'
         displevel = 2;
     otherwise
-        error('iter_optimize:invalidarg', ...
+        error('pli_iteroptim:invalidarg', ...
             'Invalid value for the display option.');
 end
 

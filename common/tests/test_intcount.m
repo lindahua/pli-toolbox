@@ -21,7 +21,7 @@ classdef test_intcount < mtest_case
             
             % exact m
             
-            C = intcount(m, I);
+            C = pli_intcount(m, I);
             assert( isequal(C, C0) );  
             
             % larger m
@@ -31,7 +31,7 @@ classdef test_intcount < mtest_case
             Cp0 = zeros(mp, 1);
             Cp0(1:m) = C0;
             
-            Cp = intcount(mp, I);
+            Cp = pli_intcount(mp, I);
             assert( isequal(Cp, Cp0) );
             
             % smaller m
@@ -40,7 +40,7 @@ classdef test_intcount < mtest_case
             
             Cn0 = C0(1:mn);
             
-            Cn = intcount(mn, I);
+            Cn = pli_intcount(mn, I);
             assert( isequal(Cn, Cn0) );
                         
         end
@@ -68,7 +68,7 @@ classdef test_intcount < mtest_case
             
             % exact m, n
             
-            C = intcount([m, n], I, J);
+            C = pli_intcount([m, n], I, J);
             assert( isequal(C, C0) );            
             
             % larger m, n
@@ -79,7 +79,7 @@ classdef test_intcount < mtest_case
             Cp0 = zeros(mp, np);
             Cp0(1:m, 1:n) = C0;
             
-            Cp = intcount([mp, np], I, J);
+            Cp = pli_intcount([mp, np], I, J);
             assert( isequal(Cp, Cp0) );
             
             % smaller m, n
@@ -89,7 +89,7 @@ classdef test_intcount < mtest_case
             
             Cn0 = C0(1:mn, 1:nn);
             
-            Cn = intcount([mn, nn], I, J);
+            Cn = pli_intcount([mn, nn], I, J);
             assert( isequal(Cn, Cn0) );            
         end
 

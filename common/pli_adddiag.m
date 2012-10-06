@@ -1,7 +1,7 @@
-function A = add_diagonals(A, v)
-%ADD_DIAGONALS Add values to diagonal elements
+function A = pli_adddiag(A, v)
+%PLI_ADDDIAG Add values to diagonal elements
 %
-%   B = ADD_DIAGONALS(A, v)
+%   B = PLI_ADDDIAG(A, v)
 %
 %       Add the value(s) of v to the diagonal elements of A.
 %       
@@ -19,7 +19,7 @@ function A = add_diagonals(A, v)
 %% argument checking
 
 if ~ismatrix(A)
-    error('add_diagonals:invalidarg', 'A must be a matrix.');
+    error('pli_adddiag:invalidarg', 'A must be a matrix.');
 end
 
 %% main

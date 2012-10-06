@@ -1,8 +1,8 @@
-function Y = normalize_exp(X, dim)
-%NORMALIZE_EXP Normalizes the exponents
+function Y = pli_nrmexp(X, dim)
+%PLI_NRMEXP Normalizes the exponents
 %
-%   Y = normalize_exp(X);
-%   Y = normalize_exp(X, dim);
+%   Y = PLI_NRMEXP(X);
+%   Y = PLI_NRMEXP(X, dim);
 %
 %       Normalizes exp(X) such that the exponent values sum to ones
 %       along the specified dimension. When dim is omitted, it runs
