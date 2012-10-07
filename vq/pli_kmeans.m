@@ -46,6 +46,11 @@ function [L, C, objv, min_ds, cnts] = pli_kmeans(X, K, varargin)
 %
 %   Options
 %   -------
+%   - weights:      The weights of data points, which should be
+%                   a vector of length n.
+%                   (default = [], indicating that all samples
+%                   have the same unit weight).
+%
 %   - maxiter :     The maximum number of iterations.
 %                   (default = 200)
 %
@@ -100,6 +105,7 @@ end
 
 % parse options
 
+opts.weights = [];
 opts.maxiter = 200;
 opts.tolfun = 1.0e-8;
 opts.display = 'iter';
@@ -109,7 +115,14 @@ if ~isempty(varargin)
     opts = pli_parseopts(opts, varargin);
 end
 
-displevel = check_options(opts);
+displevel = check_options(opts, n);
+
+w = opts.weights;
+if ~isempty(w)
+    if size(w, 1) > 1 % turn to a row vector
+        w = w.';
+    end
+end
 
 
 %% main
@@ -165,7 +178,11 @@ while ~converged && t < maxiter
     
     % update centers and distances
     
-    S = pli_aggregx(K, X, L);
+    if isempty(w)
+        S = pli_aggregx(K, X, L);
+    else
+        S = pli_aggregx(K, bsxfun(@times, X, w), L);
+    end
         
     if t == 1 || all(aff_c)
         if all(cnts > 0)
@@ -181,11 +198,17 @@ while ~converged && t < maxiter
         ri = find(cnts == 0 & aff_c);
     end        
     
+    if isempty(w)
+        cw = cnts;
+    else
+        cw = pli_aggregx(K, w, L).';
+    end
+    
     if u_all
-        C = bsxfun(@times, S, 1 ./ cnts);
+        C = bsxfun(@times, S, 1 ./ cw);
         D = pli_pw_euclidean(C, X, 'sq');
     else
-        Cu = bsxfun(@times, S(:, ui), 1 ./ cnts(ui));
+        Cu = bsxfun(@times, S(:, ui), 1 ./ cw(ui));
         C(:, ui) = Cu;
         D(ui, :) = pli_pw_euclidean(Cu, X, 'sq');
         
@@ -201,7 +224,11 @@ while ~converged && t < maxiter
     [min_ds, L] = min(D, [], 1);
     cnts = double(pli_intcount(K, L).');
     
-    objv = sum(min_ds);
+    if isempty(w)
+        objv = sum(min_ds);
+    else
+        objv = min_ds * w';
+    end
     
     % determine affected clusters
     
@@ -242,7 +269,15 @@ end
 
 %% Auxiliary functions
 
-function displevel = check_options(s)
+function displevel = check_options(s, n)
+
+v = s.weights;
+if ~isempty(v)
+    if ~(isfloat(v) && isreal(v) && isvector(v) && numel(v) == n)
+        error('pli_kmeans:invalidarg', ...
+            'The weights should be a real vector of length n.');
+    end
+end
 
 v = s.maxiter;
 if ~(isscalar(v) && isnumeric(v) && isreal(v) && v >= 1)
