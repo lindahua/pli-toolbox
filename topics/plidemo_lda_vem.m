@@ -1,7 +1,7 @@
-function lda_vem_demo()
-%LDA_VEM_DEMO Demonstrate the use of LDA with variational EM
+function plidemo_lda_vem()
+%PLIDEMO_LDA_VEM Demonstrate the use of LDA with variational EM
 %
-%   LDA_VEM_DEMO;
+%   PLIDEMO_LDA_VEM;
 %
 
 %% Experiment configuration
@@ -40,7 +40,7 @@ disp(' ');
 disp('Documents');
 disp('========================');
 
-Theta = dirichlet_sample(alpha, ndocs);
+Theta = pli_dirichlet_sample(alpha, ndocs);
 
 H = zeros(V, ndocs);
 for i = 1 : ndocs
@@ -67,14 +67,14 @@ disp('  pmean: posterior mean');
 disp('  theta: underlying p');
 disp('========================');
 
-vi_problem = lda_vinfer_problem(alpha, U);
+vi_problem = pli_lda_vinfer_problem(alpha, U);
 
 for i = 1 : ndocs_show
     
     h = H(:, i);
     sol = vi_problem.init_solution(h);
     
-    sol = iter_optimize('maximize', @vi_problem.eval_objv, ...
+    sol = pli_iteroptim('maximize', @vi_problem.eval_objv, ...
         @vi_problem.update, sol, ...
         'display', 'off');
         
@@ -97,7 +97,7 @@ end
 disp('Model Estimation (VEM)');
 disp('========================');
 
-vem_problem = lda_vem_problem(V, 0.01);
+vem_problem = pli_lda_vem_problem(V, 0.01);
 vem_problem.set_docs(H);
 
 U_init = U + 0.1 * rand(size(U));
@@ -105,7 +105,7 @@ U_init = bsxfun(@times, U_init, 1 ./ sum(U, 1));
 
 sol = vem_problem.init_solution(U_init);
 
-sol = iter_optimize('maximize', @vem_problem.eval_objv, ...
+sol = pli_iteroptim('maximize', @vem_problem.eval_objv, ...
     @vem_problem.update, sol, ...
     'maxiter', 100, ...
     'display', 'iter');

@@ -1,7 +1,7 @@
-function [gam, phi, toc_w, elog_t] = lda_vinfer_update(alpha, logU, h, gam, T)
-%LDA_VINFER_UPDATE Performs LDA Variational inference update
+function [gam, phi, toc_w, elog_t] = pli_lda_vinfer_update(alpha, logU, h, gam, T)
+%PLI_LDA_VINFER_UPDATE Performs LDA Variational inference update
 %
-%   [gam, phi, toc_w, elog_t] = LDA_VINFER_UPDATE(alpha, logU, h, gam, niters)
+%   [gam, phi, toc_w, elog_t] = PLI_LDA_VINFER_UPDATE(alpha, logU, h, gam, niters)
 %
 %       Updates the variational latent variable: gamma and phi, for
 %       a document.
@@ -34,7 +34,7 @@ for i = 1 : T
     % update phi
     
     log_phi = bsxfun(@plus, logU, psi(gam).');
-    phi = normalize_exp(log_phi, 2);
+    phi = pli_nrmexp(log_phi, 2);
     
     toc_w = (h' * phi).';
     

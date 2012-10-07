@@ -1,4 +1,4 @@
-classdef lda_vinfer_problem < handle
+classdef pli_lda_vinfer_problem < handle
     % Latent Dirichlet Allocation variational inference
     %
     %   A solution for this problem is a struct with following fields:
@@ -29,10 +29,10 @@ classdef lda_vinfer_problem < handle
     
     methods
         
-        function obj = lda_vinfer_problem(a, U)
+        function obj = pli_lda_vinfer_problem(a, U)
             % Constructs a problem instance
             %
-            %   obj = lda_vinfer_problem(a, U);
+            %   obj = pli_lda_vinfer_problem(a, U);
             %
             %   Arguments
             %   ---------
@@ -43,12 +43,12 @@ classdef lda_vinfer_problem < handle
             % check arguments
             
             if ~(isfloat(a) && isreal(a) && ismatrix(a) && size(a,2) == 1)
-                error('lda_vinfer_problem:invalidarg', ...
+                error('pli_lda_vinfer_problem:invalidarg', ...
                     'a should be a real column vector.');
             end
             
             if ~(isfloat(U) && isreal(U) && ismatrix(U))
-                error('lda_vinfer_problem:invalidarg', ...
+                error('pli_lda_vinfer_problem:invalidarg', ...
                     'U should be a real matrix.');
             end
             
@@ -56,7 +56,7 @@ classdef lda_vinfer_problem < handle
             K = size(U, 2);
             
             if length(a) ~= K
-                error('lda_vinfer_problem:invalidarg', ...
+                error('pli_lda_vinfer_problem:invalidarg', ...
                     'The dimensions of a and U are inconsistent.');
             end
             
@@ -68,7 +68,7 @@ classdef lda_vinfer_problem < handle
             obj.alpha = a;
             obj.unigrams = U;
             
-            obj.lnB = mvbetaln(a);
+            obj.lnB = pli_mvbetaln(a);
             obj.log_unigrams = log(U);                               
         end
 
@@ -105,11 +105,11 @@ classdef lda_vinfer_problem < handle
             
             % entropy of gamma
             
-            ent_gam = dirichlet_entropy(gam, elog_theta);
+            ent_gam = pli_dirichlet_entropy(gam, elog_theta);
             
             % entropy of phi
             
-            ent_phi = h' * ddentropy(phi, 2);
+            ent_phi = h' * pli_ddentropy(phi, 2);
             
             % overall
             
@@ -135,7 +135,7 @@ classdef lda_vinfer_problem < handle
             K = self.ntopics;
             
             if ~(isfloat(h) && isreal(h) && isequal(size(h), [V 1]))
-                error('lda_vinfer_problem:invalidarg', ...
+                error('pli_lda_vinfer_problem:invalidarg', ...
                     'h should be a real vector of size [V 1]');
             end
             
@@ -161,7 +161,7 @@ classdef lda_vinfer_problem < handle
             
             % Perform update
             
-            [gam, phi, toc_w, elog_theta] = lda_vinfer_update( ...
+            [gam, phi, toc_w, elog_theta] = pli_lda_vinfer_update( ...
                 self.alpha, self.log_unigrams, sol.h, sol.gamma, 1);            
             
             % write to sol

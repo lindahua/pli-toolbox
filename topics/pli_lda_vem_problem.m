@@ -1,4 +1,4 @@
-classdef lda_vem_problem < handle
+classdef pli_lda_vem_problem < handle
     % Estimating of an LDA model using Variational EM
     %
     %   A solution is a struct with following fields:
@@ -31,11 +31,11 @@ classdef lda_vem_problem < handle
     
     methods
         
-        function obj = lda_vem_problem(V, pric)
+        function obj = pli_lda_vem_problem(V, pric)
             % Constructs a problem object
             %
-            %   obj = lda_vem_problem(V);
-            %   obj = lda_vem_problem(V, pric);
+            %   obj = pli_lda_vem_problem(V);
+            %   obj = pli_lda_vem_problem(V, pric);
             %
             %   Arguments
             %   ---------
@@ -44,7 +44,7 @@ classdef lda_vem_problem < handle
             %
             
             if ~(isscalar(V) && V == fix(V) && V > 1)
-                error('lda_vem_problem:invalidarg', ...
+                error('pli_lda_vem_problem:invalidarg', ...
                     'V should be a positive integer scalar with V > 1.')
             end
             
@@ -52,7 +52,7 @@ classdef lda_vem_problem < handle
                 pric = 0;
             else
                 if ~(isscalar(pric) && isreal(pric) && pric >= 0)
-                    error('lda_vem_problem:invalidarg', ...
+                    error('pli_lda_vem_problem:invalidarg', ...
                         'pric should be a non-negative real scalar.');
                 end
                 pric = double(pric);
@@ -78,12 +78,12 @@ classdef lda_vem_problem < handle
             %
             
             if ~(isfloat(H) && isreal(H) && ismatrix(H))
-                error('lda_vem_problem:invalidarg', ...
+                error('pli_lda_vem_problem:invalidarg', ...
                     'H should be a real matrix.');
             end
             
             if size(H, 1) ~= self.vsize
-                error('lda_vem_problem:invalidarg', ...
+                error('pli_lda_vem_problem:invalidarg', ...
                     'The dimension of H is invalid.');
             end
             
@@ -108,7 +108,7 @@ classdef lda_vem_problem < handle
             
             % E log(theta | alpha)
             
-            lnB = mvbetaln(sol.alpha);
+            lnB = pli_mvbetaln(sol.alpha);
             ell_theta = (sol.alpha - 1)' * Elog_theta - lnB;
             
             % E log(z | theta)
@@ -154,14 +154,14 @@ classdef lda_vem_problem < handle
             %
             
             if ~(isfloat(U) && isreal(U) && ismatrix(U))
-                error('lda_vem_problem:invalidarg', ...
+                error('pli_lda_vem_problem:invalidarg', ...
                     'U should be a real matrix.');
             end
             
             V = self.vsize;
             
             if size(U, 1) ~= V
-                error('lda_vem_problem:invalidarg', ...
+                error('pli_lda_vem_problem:invalidarg', ...
                     'The dimension of U is incorrect.');
             end
             
@@ -169,7 +169,7 @@ classdef lda_vem_problem < handle
             n = size(self.doc_hists, 2);
             
             if n == 0
-                error('lda_vem_problem:rterror', ...
+                error('pli_lda_vem_problem:rterror', ...
                     'Documents have not been set to the problem.');
             end
             
@@ -185,12 +185,12 @@ classdef lda_vem_problem < handle
                 alpha = ones(K, 1) * 2;
             else
                 if ~(isfloat(alpha) && isreal(alpha) && isvector(alpha))
-                    error('lda_vem_problem:invalidarg', ...
+                    error('pli_lda_vem_problem:invalidarg', ...
                         'alpha should be a real vector.');
                 end
                 
                 if numel(alpha) ~= K
-                    error('lda_vem_problem:invalidarg', ...
+                    error('pli_lda_vem_problem:invalidarg', ...
                         'The dimension of alpha is invalid.');
                 end
                 
@@ -280,7 +280,7 @@ classdef lda_vem_problem < handle
                 
                 % update phi and gam
                 
-                [gam, phi, toc_w, elog_t] = lda_vinfer_update( ...
+                [gam, phi, toc_w, elog_t] = pli_lda_vinfer_update( ...
                     alpha, logU, h, Gam(:, i), nv);
                 
                 % store/accumulate results
@@ -291,8 +291,8 @@ classdef lda_vem_problem < handle
                 tocW(:, i) = toc_w;
                 accumPhi = accumPhi + bsxfun(@times, h, phi);
                 
-                gam_ents(i) = dirichlet_entropy(gam);
-                phi_ents(i) = h' * ddentropy(phi, 2);
+                gam_ents(i) = pli_dirichlet_entropy(gam);
+                phi_ents(i) = h' * pli_ddentropy(phi, 2);
             end
             
             sol.Gam = Gam;
@@ -305,7 +305,7 @@ classdef lda_vem_problem < handle
             
             % estimate alpha
             
-            alpha = dirichlet_mle(Elog_theta, alpha, ...
+            alpha = pli_dirichlet_mle(Elog_theta, alpha, ...
                 'is_log', true, 'verbose', false);
             
             sol.alpha = alpha;
