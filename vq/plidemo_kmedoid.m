@@ -1,13 +1,13 @@
-function demo_kmedoid(K, n, op)
-%DEMO_KMEDOID A simple program to demonstrate the use of kmedoid
+function plidemo_kmedoid(K, n, op)
+%PLIDEMO_KMEDOID A simple program to demonstrate the use of kmedoid
 %
-%   DEMO_KMEDOID;
-%   DEMO_KMEDOID(K);
-%   DEMO_KMEDOID(K, n);
+%   PLIDEMO_KMEDOID;
+%   PLIDEMO_KMEDOID(K);
+%   PLIDEMO_KMEDOID(K, n);
 %
 %       Perform K-medoid on n randomly generated points.
 %
-%   DEMO_KMEDOID(K, n, 'c');
+%   PLIDEMO_KMEDOID(K, n, 'c');
 %
 %       Perform K-medoid using pre-computed cost matrix.
 %
@@ -32,7 +32,7 @@ if nargin < 3
     use_c = 0;
 else
     if ~strcmpi(op, 'c')
-        error('demo_kmedoid:invalidarg', 'The 3rd argument is invalid.');
+        error('plidemo_kmedoid:invalidarg', 'The 3rd argument is invalid.');
     end
     use_c = 1;
 end
@@ -48,10 +48,10 @@ X = randn(d, n);
 % perform K-means
 
 if use_c
-    C = pw_euclidean(X, [], 'sq');
-    [~, s] = kmedoid_c(C, K, 'display', 'iter');    
+    C = pli_pw_euclidean(X, [], 'sq');
+    [~, s] = pli_kmedoid_c(C, K, 'display', 'iter');    
 else
-    [~, s] = kmedoid(X, K, 'display', 'iter');
+    [~, s] = pli_kmedoid(X, K, 'display', 'iter');
 end
 
 % visualize results

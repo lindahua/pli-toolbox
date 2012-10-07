@@ -1,15 +1,15 @@
-function [L, C, objv, min_ds, cnts] = kmeans_std(X, K, varargin)
-%KMEANS_STD Standard K-means clustering
+function [L, C, objv, min_ds, cnts] = pli_kmeans(X, K, varargin)
+%PLI_KMEANS Standard K-means clustering
 %
-%   [L, C] = KMEANS_STD(X, K, ...);
-%   [L, C] = KMEANS_STD(X, C0, ...);
+%   [L, C] = PLI_KMEANS(X, K, ...);
+%   [L, C] = PLI_KMEANS(X, C0, ...);
 %
 %       Performs standard K-means on a set of vectors, and returns 
 %       the resultant labels in L, and the centers in C.
 %
-%   [L, C, objv] = KMEANS_STD( ... );
-%   [L, C, objv, min_ds] = KMEANS_STD( ... );
-%   [L, C, objv, min_ds, cnts] = KMEANS_STD( ... );
+%   [L, C, objv] = PLI_KMEANS( ... );
+%   [L, C, objv, min_ds] = PLI_KMEANS( ... );
+%   [L, C, objv, min_ds, cnts] = PLI_KMEANS( ... );
 %
 %       With more output arguments, this function returns additional
 %       information about the result.
@@ -63,7 +63,7 @@ function [L, C, objv, min_ds, cnts] = kmeans_std(X, K, varargin)
 %
 %   Remarks
 %   -------
-%       KMEANS_STD is not as heavy as the kmeans function in the 
+%       PLI_KMEANS is not as heavy as the kmeans function in the 
 %       statistics toolbox, and it is more efficient by using a 
 %       faster vectorized method to calculate pairwise distances.
 %       
@@ -71,31 +71,31 @@ function [L, C, objv, min_ds, cnts] = kmeans_std(X, K, varargin)
 %% argument checking
 
 if ~(ismatrix(X) && isfloat(X) && isreal(X) && ~isempty(X))
-    error('kmeans_std:invalidarg', 'X should be a real matrix.');
+    error('pli_kmeans:invalidarg', 'X should be a real matrix.');
 end
 [d, n] = size(X);
 
 if ismatrix(K) && isnumeric(K) && isreal(K)
     if isscalar(K) 
         if ~(K > 1 && K == fix(K))
-            error('kmeans_std:invalidarg', ...
+            error('pli_kmeans:invalidarg', ...
                 'K should be a positive integer with K > 1.');
         end
         C0 = [];
     else
         C0 = K;
         if size(C0, 1) ~= d
-            error('kmeans_std:invalidarg', ...
+            error('pli_kmeans:invalidarg', ...
                 'The dimensions of X and C0 are inconsistent.');
         end
         K = size(C0, 2);
     end
     if K >= n
-        error('kmeans_std:invalidarg', ...
+        error('pli_kmeans:invalidarg', ...
             'The value of K should be less than the number of samples.');
     end
 else
-    error('kmeans_std:invalidarg', 'The second argument is invalid.');
+    error('pli_kmeans:invalidarg', 'The second argument is invalid.');
 end
 
 % parse options
@@ -106,7 +106,7 @@ opts.display = 'iter';
 opts.init = 'kmpp';
 
 if ~isempty(varargin)
-    opts = parse_opts(opts, varargin);
+    opts = pli_parseopts(opts, varargin);
 end
 
 displevel = check_options(opts);
@@ -121,11 +121,11 @@ displevel = check_options(opts);
 if isempty(C0)
     switch opts.init
         case 'kmpp'
-            C = X(:, kmpp_seed(X, K));
+            C = X(:, pli_kmpp_seed(X, K));
         case 'rand'
-            C = X(:, sample_wor(n, K));
+            C = X(:, pli_samplewor(n, K));
         otherwise
-            error('kmeans_std:invalidarg', ...
+            error('pli_kmeans:invalidarg', ...
                 'Invalid value for the option init.');
     end
 else
@@ -134,9 +134,9 @@ end
 
 % initialize labels
 
-D = pw_euclidean(C, X, 'sq');
+D = pli_pw_euclidean(C, X, 'sq');
 [min_ds, L] = min(D, [], 1);
-cnts = double(intcount(K, L).');
+cnts = double(pli_intcount(K, L).');
 
 objv = sum(min_ds);
 
@@ -165,7 +165,7 @@ while ~converged && t < maxiter
     
     % update centers and distances
     
-    S = aggregx(K, X, L);
+    S = pli_aggregx(K, X, L);
         
     if t == 1 || all(aff_c)
         if all(cnts > 0)
@@ -183,23 +183,23 @@ while ~converged && t < maxiter
     
     if u_all
         C = bsxfun(@times, S, 1 ./ cnts);
-        D = pw_euclidean(C, X, 'sq');
+        D = pli_pw_euclidean(C, X, 'sq');
     else
         Cu = bsxfun(@times, S(:, ui), 1 ./ cnts(ui));
         C(:, ui) = Cu;
-        D(ui, :) = pw_euclidean(Cu, X, 'sq');
+        D(ui, :) = pli_pw_euclidean(Cu, X, 'sq');
         
         if ~isempty(ri)
-            Cr = X(:, sample_wor(n, numel(ri)));
+            Cr = X(:, pli_samplewor(n, numel(ri)));
             C(:, ri) = Cr;
-            D(ri, :) = pw_euclidean(Cr, X, 'sq');
+            D(ri, :) = pli_pw_euclidean(Cr, X, 'sq');
         end
     end
                     
     % update labels
         
     [min_ds, L] = min(D, [], 1);
-    cnts = double(intcount(K, L).');
+    cnts = double(pli_intcount(K, L).');
     
     objv = sum(min_ds);
     
@@ -246,19 +246,19 @@ function displevel = check_options(s)
 
 v = s.maxiter;
 if ~(isscalar(v) && isnumeric(v) && isreal(v) && v >= 1)
-    error('kmean_std:invalidarg', ...
+    error('pli_kmeans:invalidarg', ...
         'The value for option maxiter should be a positive integer.');
 end
 
 v = s.tolfun;
 if ~(isscalar(v) && isfloat(v) && isreal(v) && v >= 0)
-    error('kmean_std:invalidarg', ...
+    error('pli_kmeans:invalidarg', ...
         'The value for option tolfun should be a non-negative scalar.');
 end
 
 v = s.display;
 if ~ischar(v)
-    error('kmeans_std:invalidarg', ...
+    error('pli_kmeans:invalidarg', ...
         'The value for option display should be a string.');
 end
 
@@ -270,13 +270,13 @@ switch lower(v)
     case 'iter'
         displevel = 2;
     otherwise
-        error('kmeans_std:invalidarg', ...
+        error('pli_kmeans:invalidarg', ...
             'Invalid value for option display.');
 end
 
 v = s.init;
 if ~ischar(v)
-    error('kmeans_std:invalidarg', ...
+    error('pli_kmeans:invalidarg', ...
         'The value for option init should be a string.');
 end
 

@@ -1,9 +1,9 @@
-function demo_kmeans_std(K, n)
-%DEMO_KMEANS_STD A simple program to demonstrate the use of kmeans_std
+function plidemo_kmeans(K, n)
+%PLIDEMO_KMEANS A simple program to demonstrate the use of kmeans_std
 %
-%   DEMO_KMEANS_STD;
-%   DEMO_KMEANS_STD(K);
-%   DEMO_KMEANS_STD(K, n);
+%   PLIDEMO_KMEANS;
+%   PLIDEMO_KMEANS(K);
+%   PLIDEMO_KMEANS(K, n);
 %
 %       Perform K-means on n randomly generated points.
 %
@@ -32,7 +32,7 @@ X = randn(d, n);
 
 % perform K-means
 
-[~, C] = kmeans_std(X, K, 'display', 'iter');
+[~, C] = pli_kmeans(X, K, 'display', 'iter');
 
 % visualize results
 

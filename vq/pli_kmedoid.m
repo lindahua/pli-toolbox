@@ -1,16 +1,16 @@
-function [L, s, objv, mincost, cnts] = kmedoid(X, K, varargin)
-%KMEDOID k-Medoid clustering
+function [L, s, objv, mincost, cnts] = pli_kmedoid(X, K, varargin)
+%PLI_KMEDOID k-Medoid clustering
 %
-%   [L, s] = KMEDOID(X, K, ...);
-%   [L, s] = KMEDOID(x, s0, ...);
+%   [L, s] = PLI_KMEDOID(X, K, ...);
+%   [L, s] = PLI_KMEDOID(x, s0, ...);
 %
 %       Performs K-medoid clustering on the samples given by X. 
 %       By default the clustering is based on squared euclidean
 %       distances.
 %
-%   [L, s, objv] = KMEDOID(X, K, ...);
-%   [L, s, objv, minds] = KMEDOID(X, K, ...);
-%   [L, s, objv, minds, cnts] = KMEDOID(X, K, ...);
+%   [L, s, objv] = PLI_KMEDOID(X, K, ...);
+%   [L, s, objv, minds] = PLI_KMEDOID(X, K, ...);
+%   [L, s, objv, minds, cnts] = PLI_KMEDOID(X, K, ...);
 %       
 %       With more output arguments, this function returns additional
 %       information about the result.
@@ -67,18 +67,19 @@ function [L, s, objv, mincost, cnts] = kmedoid(X, K, varargin)
 %                   - 'kmpp' : Using Kmeans++ method (call kmpp_seeds)
 %                   - 'rand' : Randomly select K samples as seeds.
 %                   default = 'kmpp'.
+%
 
 %% argument checking
 
 if ~(ismatrix(X) && isfloat(X) && isreal(X) && ~isempty(X))
-    error('kmedoid:invalidarg', 'X should be a real matrix.');
+    error('pli_kmedoid:invalidarg', 'X should be a real matrix.');
 end
 n = size(X, 2);
 
 if isvector(K) && isnumeric(K) && isreal(K)
     if isscalar(K) 
         if ~(K > 1 && K == fix(K))
-            error('kmedoid:invalidarg', ...
+            error('pli_kmedoid:invalidarg', ...
                 'K should be a positive integer with K > 1.');
         end
         s0 = [];
@@ -91,11 +92,11 @@ if isvector(K) && isnumeric(K) && isreal(K)
         end
     end
     if K >= n
-        error('kmedoid:invalidarg', ...
+        error('pli_kmedoid:invalidarg', ...
             'The value of K should be less than the number of samples.');
     end
 else
-    error('kmedoid:invalidarg', 'The second argument is invalid.');
+    error('pli_kmedoid:invalidarg', 'The second argument is invalid.');
 end
 
 % parse options
@@ -107,7 +108,7 @@ opts.display = 'iter';
 opts.init = 'kmpp';
 
 if ~isempty(varargin)
-    opts = parse_opts(opts, varargin);
+    opts = pli_parseopts(opts, varargin);
 end
 
 displevel = check_options(opts);
@@ -122,11 +123,11 @@ cfun = opts.costfun;
 if isempty(s0)
     switch opts.init
         case 'kmpp'
-            s = kmpp_seed(X, K, cfun);
+            s = pli_kmpp_seed(X, K, cfun);
         case 'rand'
-            s = sample_wor(n, K);
+            s = pli_samplewor(n, K);
         otherwise
-            error('kmedoid:invalidarg', ...
+            error('pli_kmedoid:invalidarg', ...
                 'Invalid value for the option init.');
     end
 else
@@ -136,12 +137,12 @@ end
 % initialize labels
 
 if isempty(cfun)
-    cfun = @(x, y) pw_euclidean(x, y, 'sq');
+    cfun = @(x, y) pli_pw_euclidean(x, y, 'sq');
 end
 
 costs = cfun(X(:,s), X);
 [mincost, L] = min(costs, [], 1);
-[sL, gb, ge] = idxgroup(K, L);
+[sL, gb, ge] = pli_idxgroup(K, L);
 
 objv = sum(mincost);
 
@@ -189,7 +190,7 @@ while ~converged && t < maxiter
         % update labels
                 
         [mincost, L] = min(costs, [], 1);
-        [sL, gb, ge] = idxgroup(K, L);
+        [sL, gb, ge] = pli_idxgroup(K, L);
         
         objv = sum(mincost);
         
@@ -222,25 +223,25 @@ function displevel = check_options(s)
 
 v = s.costfun;
 if ~(isempty(v) || isa(v, 'function_handle'))
-    error('kmedoid:invalidarg', ...
+    error('pli_kmedoid:invalidarg', ...
         'The value for option costfun should be a function handle.');
 end
 
 v = s.maxiter;
 if ~(isscalar(v) && isnumeric(v) && isreal(v) && v >= 1)
-    error('kmedoid:invalidarg', ...
+    error('pli_kmedoid:invalidarg', ...
         'The value for option maxiter should be a positive integer.');
 end
 
 v = s.tolfun;
 if ~(isscalar(v) && isfloat(v) && isreal(v) && v >= 0)
-    error('kmedoid:invalidarg', ...
+    error('pli_kmedoid:invalidarg', ...
         'The value for option tolfun should be a non-negative scalar.');
 end
 
 v = s.display;
 if ~ischar(v)
-    error('kmedoid:invalidarg', ...
+    error('pli_kmedoid:invalidarg', ...
         'The value for option display should be a string.');
 end
 
@@ -252,13 +253,13 @@ switch lower(v)
     case 'iter'
         displevel = 2;
     otherwise
-        error('kmedoid:invalidarg', ...
+        error('pli_kmedoid:invalidarg', ...
             'Invalid value for option display.');
 end
 
 v = s.init;
 if ~ischar(v)
-    error('kmedoid:invalidarg', ...
+    error('pli_kmedoid:invalidarg', ...
         'The value for option init should be a string.');
 end
 
