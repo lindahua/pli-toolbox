@@ -1,5 +1,5 @@
-classdef fmm_em_problem < handle
-    %FMM_EM_PROBLEM The problem to estimate finite mixtures using EM
+classdef pli_fmm_em_problem < handle
+    %PLI_FMM_EM_PROBLEM The problem to estimate finite mixtures using EM
     %
     %   A solution to a FMM EM problem is a struct with the following
     %   fields:
@@ -34,7 +34,7 @@ classdef fmm_em_problem < handle
     
     methods
         
-        function obj = fmm_em_problem(model, pric)
+        function obj = pli_fmm_em_problem(model, pric)
             % Constructs a problem object
             %
             %   obj = FMM_EM_PROBLEM(model);
@@ -49,16 +49,16 @@ classdef fmm_em_problem < handle
             %               (default = 0).
             %
             
-            if ~isa(model, 'pmodel_base')
-                error('fmm_em_problem:invalidarg', ...
-                    'model should be an instance of pmodel_base.');
+            if ~isa(model, 'pli_pmodel_base')
+                error('pli_fmm_em_problem:invalidarg', ...
+                    'model should be an instance of pli_pmodel_base.');
             end
             
             if nargin < 2
                 pric = 0;
             else
                 if ~(isreal(pric) && isscalar(pric) && pric >= 0)
-                    error('fmm_em_problem:invalidarg', ...
+                    error('pli_fmm_em_problem:invalidarg', ...
                         'pric should be non-negative scalar.');
                 end
                 pric = double(pric);
@@ -88,7 +88,7 @@ classdef fmm_em_problem < handle
                 w = [];
             else
                 if ~(isreal(w) && isfloat(w) && isequal(size(w), [n 1]))
-                    error('fmm_em_problem:invalidarg', ...
+                    error('pli_fmm_em_problem:invalidarg', ...
                         'The size of w is invalid.');
                 end
             end
@@ -248,7 +248,7 @@ classdef fmm_em_problem < handle
             
             % E-step
             
-            Q = normalize_exp(bsxfun(@plus, L, log(pi)), 1);
+            Q = pli_nrmexp(bsxfun(@plus, L, log(pi)), 1);
             
             % write update to sol
             

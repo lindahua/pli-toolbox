@@ -1,7 +1,7 @@
-function demo_gmm_em()
-%DEMO_GMM_EM Demonstartes GMM estimation using EM
+function plidemo_gmm_em()
+%PLIDEMO_GMM_EM Demonstartes GMM estimation using EM
 %
-%   DEMO_GMM_EM();
+%   PLIDEMO_GMM_EM();
 %
 
 %% Experiment configuration
@@ -33,7 +33,7 @@ X = [X{:}];
 
 %% Perform estimation
 
-sol = gmm_em(X, K, 'covform', cform, ...
+sol = pli_gmm_em(X, K, 'covform', cform, ...
     'display', 'iter');
 
 G = sol.components;
@@ -48,9 +48,9 @@ plot(X(1,:), X(2,:), 'b.', 'MarkerSize', 5);
 
 npts = 1000;
 hold on;
-gauss2d_contour(G, 1, npts, 'r-', 'LineWidth', 2);
+pli_gauss2d_contour(G, 1, npts, 'r-', 'LineWidth', 2);
 hold on;
-gauss2d_contour(G, 2, npts, 'm-', 'LineWidth', 2);
+pli_gauss2d_contour(G, 2, npts, 'm-', 'LineWidth', 2);
 
 axis equal;
 

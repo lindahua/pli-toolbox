@@ -1,8 +1,8 @@
-function [sol, objv, t, converged] = gmm_em(X, K, varargin)
-%GMM_EM Estimates a Gaussian mixture model using EM
+function [sol, objv, t, converged] = pli_gmm_em(X, K, varargin)
+%PLI_GMM_EM Estimates a Gaussian mixture model using EM
 %
-%   [sol, objv, t, converged] = GMM_EM(X, K, ...)
-%   [sol, objv, t, converged] = GMM_EM(X, Q0, ...)
+%   [sol, objv, t, converged] = PLI_GMM_EM(X, K, ...)
+%   [sol, objv, t, converged] = PLI_GMM_EM(X, Q0, ...)
 %
 %       Estimates a Gaussian mixture model using EM algorithm.
 %       One can either specify the number of components K or an initial
@@ -59,7 +59,7 @@ function [sol, objv, t, converged] = gmm_em(X, K, varargin)
 %% argument checking
 
 if ~(isreal(X) && isfloat(X) && ismatrix(X))
-    error('gmm_em:invalidarg', 'X should be a real matrix.');
+    error('pli_gmm_em:invalidarg', 'X should be a real matrix.');
 end
 
 % default options
@@ -76,7 +76,7 @@ S.display = 'iter';
 % override options
 
 if ~isempty(varargin)
-    S = parse_opts(S, varargin);
+    S = pli_parseopts(S, varargin);
 end
 
 %% main
@@ -84,8 +84,8 @@ end
 % problem construction
 
 d = size(X, 1);
-model = gauss_model(d, S.covform);
-problem = fmm_em_problem(model, S.pricount);
+model = pli_gauss_model(d, S.covform);
+problem = pli_fmm_em_problem(model, S.pricount);
 
 problem.set_obs(X, S.weights);
 
@@ -95,7 +95,7 @@ sol = problem.init_solution(K);
 
 % optimize solution
 
-[sol, objv, t, converged] = iter_optimize('maximize', ...
+[sol, objv, t, converged] = pli_iteroptim('maximize', ...
     @problem.eval_objv, @problem.update, sol, ...
     'maxiter', S.maxiter, ...
     'tolfun', S.tolfun, ...

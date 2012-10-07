@@ -60,12 +60,12 @@ classdef pli_gauss_model < pli_pmodel_base
         
         function G = estimate_param(self, X, weights, ~)
             
-            G = gauss_mle(X, weights, self.cform);
+            G = pli_gauss_mle(X, weights, self.cform);
         end
         
         function L = evaluate_loglik(~, G, X)
             
-            L = gauss_logpdf(G, X);
+            L = pli_gauss_logpdf(G, X);
         end
         
         function L = evaluate_logpri(~, ~)
