@@ -1,13 +1,13 @@
-function [P, vars, res] = prin_comp_cov(C, k)
-%PRIN_COMP_COV Principal component analysis based on covariance
+function [P, vars, res] = pli_pca_c(C, k)
+%PLI_PCA_C Principal component analysis based on covariance
 %
-%   [P, vars, res] = PRIN_COMP_COV(C, k);
+%   [P, vars, res] = PLI_PCA_C(C, k);
 %
 %       Performs principal componentn analysis based on the covariance
 %       matrix C, and returns the first k principal components in U.
 %       (Here, k >= 1).
 %   
-%   [P, vars, res] = PRIN_COMP_COV(C, p);
+%   [P, vars, res] = PLI_PCA_C(C, p);
 %
 %       Performs principal components analysis based on the covariance
 %       matrix C, and returns the first k principal components in U.
@@ -39,22 +39,22 @@ function [P, vars, res] = prin_comp_cov(C, k)
 %% argument checking
 
 if ~(ismatrix(C) && isreal(C) && isfloat(C) && size(C,1) == size(C,2))
-    error('prin_comp_cov:invalidarg', ...
+    error('pli_pca_c:invalidarg', ...
         'C should be a real square matrix.');
 end
 
 if ~(isscalar(k) && isreal(k) && k > 0)
-    error('prin_comp_cov:invalidarg', ...
+    error('pli_pca_c:invalidarg', ...
         'The second argument is invalid.');
 end
 
 if k >= 1    
     if k ~= fix(k)
-        error('prin_comp_cov:invalidarg', ...
+        error('pli_pca_c:invalidarg', ...
             'k should be a positive integer.');
     end
     if k >= size(C, 1)
-        error('prin_comp_cov:invalidarg', ...
+        error('pli_pca_c:invalidarg', ...
             'k should be less than size(C, 1).');
     end
     fix_k = 1;
@@ -66,7 +66,7 @@ end
 
 %% main
 
-[U, evs] = symeig(C);
+[U, evs] = pli_symeig(C);
 
 if ~fix_k
     cs = cumsum(evs);
