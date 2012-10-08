@@ -46,6 +46,10 @@ function [L, C, objv, min_ds, cnts] = pli_kmeans(X, K, varargin)
 %
 %   Options
 %   -------
+%   - repeats:      The number of times repeating the procedure.
+%                   The best solution is output eventually.
+%                   (default = 1).
+%
 %   - weights:      The weights of data points, which should be
 %                   a vector of length n.
 %                   (default = [], indicating that all samples
@@ -105,6 +109,7 @@ end
 
 % parse options
 
+opts.repeats = 1;
 opts.weights = [];
 opts.maxiter = 200;
 opts.tolfun = 1.0e-8;
@@ -124,8 +129,37 @@ if ~isempty(w)
     end
 end
 
+if opts.repeats > 1
+    if ~isempty(C0)
+        error('pli_kmeans:invalidarg', ...
+            'Cannot set more than one repeats when C0 is given.');
+    end
+end
+
 
 %% main
+
+[L, C, objv, min_ds, cnts] = do_kmeans(X, K, C0, w, displevel, opts);
+
+if opts.repeats > 1
+    
+    for ri = 2 : opts.repeats
+        [tL, tC, tobjv, tmin_ds, tcnts] = do_kmeans(X, K, C0, w, displevel, opts);
+        
+        if tobjv < objv
+            L = tL;
+            C = tC;
+            objv = tobjv;
+            min_ds = tmin_ds;
+            cnts = tcnts;
+        end
+    end
+end
+
+
+%% Core function
+
+function [L, C, objv, min_ds, cnts] = do_kmeans(X, K, C0, w, displevel, opts)
 
 % Initialize
 
@@ -266,10 +300,15 @@ if displevel >= 1
 end
 
 
-
 %% Auxiliary functions
 
 function displevel = check_options(s, n)
+
+v = s.repeats;
+if ~(isscalar(v) && isreal(v) && v == fix(v) && v >= 1)
+    error('pli_kmeans:invalidarg', ...
+        'The value for repeats should be a positive integer.');
+end
 
 v = s.weights;
 if ~isempty(v)

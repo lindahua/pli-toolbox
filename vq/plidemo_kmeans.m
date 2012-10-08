@@ -32,7 +32,8 @@ X = randn(d, n);
 
 % perform K-means
 
-[~, C] = pli_kmeans(X, K, 'display', 'iter');
+[~, C, objv] = pli_kmeans(X, K, 'display', 'iter', 'repeats', 3);
+fprintf('Final objv = %f\n', objv);
 
 % visualize results
 
