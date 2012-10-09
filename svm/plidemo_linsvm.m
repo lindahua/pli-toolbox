@@ -23,7 +23,7 @@ end
 
 %% Data generation
 
-t = deg2rad(60);
+t = pi / 3;
 R = [cos(t) -sin(t); sin(t) cos(t)];
 Z = R * diag([4, 1]) * randn(2, 2 * n);
 
