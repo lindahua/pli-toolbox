@@ -8,7 +8,7 @@ function plidemo_linsvm(n, solver)
 %       Here, n is the number of samples of each class.
 %       The default value of n is 500;
 %
-%       solver is either 'ip', 'gurobi'.
+%       solver is either 'ip', 'gurobi', or 'pegasos'.       
 %
 
 %% arguments
@@ -27,45 +27,54 @@ t = pi / 3;
 R = [cos(t) -sin(t); sin(t) cos(t)];
 Z = R * diag([4, 1]) * randn(2, 2 * n);
 
-Xp = bsxfun(@plus, Z(:, 1:n), [5 0]');
-Xn = bsxfun(@plus, Z(:, n+1:2*n), [-5 0]');
+Xp = bsxfun(@plus, Z(:, 1:n), [0 0]');
+Xn = bsxfun(@plus, Z(:, n+1:2*n), [10 0]');
 
 X = [Xp, Xn];
 y = [ones(1, n), -ones(1, n)];
 
 %% Solve SVM
 
-c = 10;
+switch solver    
 
-% set to show optimization procedure
-
-opts = [];
-
-if strcmp(solver, 'ip')
-    opts = optimset('Display', 'iter');
-elseif strcmp(solver, 'gurobi')
-    opts.outputflag = 1;
+    case {'ip', 'gurobi'}
+        c = 10;
+        
+        opts = [];        
+        if strcmp(solver, 'ip')
+            opts = optimset('Display', 'iter');
+        elseif strcmp(solver, 'gurobi')
+            opts.outputflag = 1;
+        end
+        
+        tic;
+        [w, w0, ~, objv] = pli_linsvm(X, y, c, solver, opts);
+        solve_time = toc;
+                
+    case 'pegasos'   
+        lambda = 1e-3;
+        T = 200 / lambda;
+        aug = 10;
+        
+        tic;
+        [w, w0] = pli_pegasos(X, y, lambda, T, aug);
+        solve_time = toc;   
+        
+        objv = [];
 end
 
-% solve
-
-tic;
-[w, w0, ~, objv] = pli_linsvm(X, y, c, solver, opts);
-solve_time = toc;
-
-fprintf('Solve time = %.4f sec\n', solve_time); 
-
 % show solution
+
+fprintf('Solve time = %.4f sec\n', solve_time);
 
 disp('Solutions');
 disp('=============');
 display(w);
 display(w0);
-display(objv);
+if ~isempty(objv)
+    display(objv);
+end
 
-%DEBUG
-% objv0 = 0.5 * sum(w.^2) + c * sum(max(0, 1 - y .* (w' * X + w0)));
-% fprintf('objv.dev = %g\n', objv0 - objv);
 
 
 %% Visualization
