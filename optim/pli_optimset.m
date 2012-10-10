@@ -48,6 +48,13 @@ if ischar(opt0)
             opt.tolx = 1.0e-7;
             opt.tolfun = 1.0e-8;
             opt.backtrk = 0.5;
+            opt.display = 'off';     
+            
+        case 'newton'
+            opt.maxiter = 100;
+            opt.tolx = 1.0e-8;
+            opt.tolfun = 1.0e-9;
+            opt.backtrk = 0.75;
             opt.display = 'off';            
             
         otherwise

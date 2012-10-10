@@ -140,7 +140,7 @@ end
 
 %% objective function
 
-    function [v, g] = objfun(s)
+    function [v, g, H] = objfun(s)
         
         if use_bias
             t = s(1:d);
@@ -166,7 +166,7 @@ end
             v = v + (lambda0/2) * (t0^2);
         end
         
-        % evaluate gradient
+        % evaluate gradient (upon request)
         
         if nargout >= 2
             
@@ -192,6 +192,38 @@ end
                 g = [g; g0];
             end
         end 
+        
+        % evaluate Hessian (upon request)
+        
+        if nargout >= 3
+            
+            rho = p .* (1 - p);
+            ri = find(rho > 0);
+            
+            if ~isempty(ri)
+                Xr = X(:, ri);
+                if isempty(w)
+                    rw = rho(ri);
+                else
+                    rw = rho(ri) .* w(ri);
+                end
+                
+                G = Xr * bsxfun(@times, Xr, rw)';
+                G = 0.5 * (G + G');
+            end
+            
+            if use_bias
+                H = zeros(d+1, d+1);
+                H(1:d, 1:d) = pli_adddiag(G, lambda);
+                h = Xr * rw';
+                H(1:d, d+1) = h;
+                H(d+1, 1:d) = h;
+                H(d+1, d+1) = sum(rw) + lambda0;
+            else
+                H = pli_adddiag(G, lambda);
+            end
+            
+        end
     end
 
 end

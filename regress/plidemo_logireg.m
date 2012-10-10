@@ -29,7 +29,7 @@ y = [ones(1, n), zeros(1, n)];
 
 %% Solve
 
-lambda = 0.01 * n;
+lambda = 0.001 * n;
 lambda0 = lambda * 0.02;
 
 opts = pli_optimset('bfgs', 'display', 'iter');
