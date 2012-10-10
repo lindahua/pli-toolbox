@@ -25,15 +25,15 @@ Xp = bsxfun(@plus, Z(:, 1:n), [-5 + xcen, 0]');
 Xn = bsxfun(@plus, Z(:, n+1:2*n), [5 + xcen, 0]');
 
 X = [Xp, Xn];
-y = [ones(1, n), -ones(1, n)];
+y = [ones(1, n), zeros(1, n)];
 
 %% Solve
 
 lambda = 0.01 * n;
 lambda0 = lambda * 0.02;
 
-opts = pli_optimset('gd', 'display', 'iter');
-solver = @(f, x) pli_fmingd(f, x, opts);
+opts = pli_optimset('bfgs', 'display', 'iter');
+solver = @(f, x) pli_fminbfgs(f, x, opts);
 
 tic;
 [theta, bias] = pli_logireg(X, y, [], lambda, lambda0, [], solver);

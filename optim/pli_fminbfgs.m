@@ -1,8 +1,8 @@
-function [x, objv, exitflag] = pli_fmingd(f, x0, opts)
-%PLI_FMINGD Minimizes a function using gradient descent
+function [x, objv, exitflag] = pli_fminbfgs(f, x0, opts)
+%PLI_FMINBFGS Minimizes a function using BFGS method
 %
-%   x = PLI_FMINGD(f, x0);
-%   x = PLI_FMINGD(f, x0, opts);
+%   x = PLI_FMINBFGS(f, x0);
+%   x = PLI_FMINBFGS(f, x0, opts);
 %       
 %       Minimizes the objective function f (starting from an initial
 %       solution x0).
@@ -10,8 +10,8 @@ function [x, objv, exitflag] = pli_fmingd(f, x0, opts)
 %       opts is an option struct, which can be generated using
 %       pli_optimset. Please refer to pli_optimset for more details.
 %
-%   [x, objv] = PLI_FMINGD(f, x0, ...);
-%   [x, objv, exitflag] = PLI_FMINGD(f, x0, ...);
+%   [x, objv] = PLI_FMINBFGS(f, x0, ...);
+%   [x, objv, exitflag] = PLI_FMINBFGS(f, x0, ...);
 %
 %       Additionally returns the objective function value, and
 %       exitflag.
@@ -28,11 +28,11 @@ function [x, objv, exitflag] = pli_fmingd(f, x0, opts)
 %% argument checking
 
 if ~isa(f, 'function_handle')
-    error('pli_fmingd:invalidarg', 'f should be a function handle.');
+    error('pli_fminbfgs:invalidarg', 'f should be a function handle.');
 end
 
 if nargin < 3
-    opts = pli_optimset('gd');
+    opts = pli_optimset('bfgs');
 end
 
 maxiter = opts.maxiter;
@@ -51,6 +51,8 @@ t = 0;
 x = x0;
 [objv, g] = f(x);
 
+d = size(x, 1);
+H = eye(d, d);
 
 if displevel >= 2
     fprintf('%7s  %15s  %15s  %15s  %6s\n', ...
@@ -66,17 +68,20 @@ while ~exitflag && t < maxiter;
            
     t = t + 1;
     x_pre = x;
+    g_pre = g;
     objv_pre = objv;
     
     % update
     
-    cx = x - g;
+    p = H \ g;
+    
+    cx = x - p;
     [cv, cg] = f(cx);
     
-    btrks = 0;        
+    btrks = 0;
     
     if cv < objv
-        x = cx;
+        x = cx;        
         objv = cv;
         g = cg;                
     else    
@@ -84,7 +89,7 @@ while ~exitflag && t < maxiter;
         while cv >= objv && eta > eta_lb
             btrks = btrks + 1;
             eta = eta * backtrk;
-            cx = x - eta * g;
+            cx = x - eta * p;
             cv = f(cx);
         end
         
@@ -95,6 +100,18 @@ while ~exitflag && t < maxiter;
             exitflag = 2;
         end
     end
+    
+    % update H
+    
+    if ~exitflag
+        
+        dx = x - x_pre;
+        y = g - g_pre;
+        
+        Hdx = H * dx;
+        H = H + (y * y') * (1 / (y' * dx)) - (Hdx * Hdx') * (1 / (dx' * Hdx));        
+    end
+    
     
     % determine convergence
             
@@ -112,7 +129,7 @@ while ~exitflag && t < maxiter;
 end
 
 if displevel >= 1
-    fprintf('fmingd terminated with exitflag %d\n', exitflag);
+    fprintf('fminbfgs terminated with exitflag %d\n', exitflag);
 end
 
 

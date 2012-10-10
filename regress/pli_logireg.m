@@ -9,7 +9,11 @@ function [theta, theta0] = pli_logireg(X, y, w, lambda, lambda0, s0, solver)
 %
 %   Here, the loss function is defined to be
 %
-%       loss(u, y) = log(1 + exp(-y * u))
+%       loss(u, y) = - (y log(p) + (1 - y) log(1 - p)), with
+%
+%                p = 1 / (1 + exp(-u)).
+%
+%   Here, y can take value 0 or 1.
 %
 %   
 %   [theta, theta0] = PLI_LOGIREG(X, y, w, lambda);
@@ -54,7 +58,7 @@ function [theta, theta0] = pli_logireg(X, y, w, lambda, lambda0, s0, solver)
 %
 %                   x = solver(f, x0).
 %
-%               By default, pli_fminnewton is used.
+%               By default, @pli_fminbfgs is used.
 %
 
 %% Argument checking
@@ -112,7 +116,7 @@ else
 end
 
 if nargin < 7
-    solver = @pli_fmingd;
+    solver = @pli_fminbfgs;
 else
     if ~isa(solver, 'function_handle')
         error('pli_logireg:invalidarg', ...
@@ -144,19 +148,12 @@ end
             u = (t' * X) + t0;
         else
             t = s;
-            u = t' * X;
+            u = t' * X; 
         end
         
         % evaluate objective value
-        
-        yu = y .* u;
-        
-        sp = find(yu >= 0);
-        sn = find(yu < 0);
-        
-        loss = zeros(1, n);
-        loss(sp) = log(1 + exp(- yu(sp)));
-        loss(sn) = -yu(sn) + log(1 + exp(yu(sn)));
+                
+        loss = y .* log1p_exp(-u) + (1 - y) .* log1p_exp(u);
         
         if isempty(w)
             tloss = sum(loss);
@@ -173,21 +170,22 @@ end
         
         if nargout >= 2
             
-            yq = y ./ (1 + exp(yu));
+            p = 1 ./ (1 + exp(-u));
+            pmy = p - y;
             
             if isempty(w)
-                g = - (X * yq');
+                g = X * pmy';
             else
-                g = - (X * (yq' .* w));
+                g = X * (pmy' .* w);
             end
             
             g = g + lambda * t;
             
             if use_bias
                 if isempty(w)
-                    g0 = - sum(yq);
+                    g0 = sum(pmy);
                 else
-                    g0 = - ((yq) * w);
+                    g0 = pmy * w;
                 end
                 
                 g0 = g0 + lambda0 * t0;

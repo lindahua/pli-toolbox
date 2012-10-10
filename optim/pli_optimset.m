@@ -43,6 +43,13 @@ if ischar(opt0)
             opt.backtrk = 0.5;
             opt.display = 'off';
             
+        case 'bfgs'
+            opt.maxiter = 150;
+            opt.tolx = 1.0e-7;
+            opt.tolfun = 1.0e-8;
+            opt.backtrk = 0.5;
+            opt.display = 'off';            
+            
         otherwise
             error('pli_optimset:invalidarg', ...
                 'Unsupported function name %s', fun);
