@@ -23,7 +23,7 @@ function [v, g] = pli_linsvm_objv(X, y, lambda, lambda0, h, theta, bias)
 %   h equals 0.
 %
 %
-%   v = PLI_LINSVM_OBJV(X, y, lambda, lambda0, h, theta, bias)
+%   v = PLI_LINSVM_OBJV(X, y, lambda, lambda0, h, theta)
 %   v = PLI_LINSVM_OBJV(X, y, lambda, lambda0, h, theta, bias);
 %
 %       Evaluates the linear SVM objective as above. When bias is not
