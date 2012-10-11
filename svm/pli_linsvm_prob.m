@@ -1,18 +1,18 @@
-function [H, f, A, b, lb] = pli_linsvm_prob(X, y, c)
+function [H, f, A, b, lb] = pli_linsvm_prob(X, y, lambda)
 %PLI_LINSVM_PROB Constructs a QP problem for linear SVM
 %
-%   [H, f, A, b] = PLI_LINSVM_PROB(X, y, c);
+%   [H, f, A, b] = PLI_LINSVM_PROB(X, y, lambda);
 %
 %       Constructs a QP problem for a linear SVM as
 %
-%           minimize 0.5 * ||w|| + sum_i c * xi_i
+%           minimize (lambda/2) * ||theta|| + (1/n) * sum_i xi_i
 %
-%               s.t. y_i (w' * x_i + w0) >= 1 - xi_i
+%               s.t. y_i (theta' * x_i + bias) >= 1 - xi_i
 %
 %       The solution s is a (d+n+1)-dimensional vector, where 
-%       - s(1:d) is w,
-%       - s(d+1) is w0,
-%       - s(d+2:d+n+1) is xi
+%       - s(1:d) is theta,
+%       - s(d+1) is bias,
+%       - s(d+2:d+n+1) is xi (slack variables)
 %
 %       This problem can be written as
 %
@@ -43,10 +43,9 @@ if ~(isfloat(y) && isreal(y) && isvector(y) && length(y) == n)
         'y should be a real vector of length n.');
 end
 
-if ~(isfloat(c) && isreal(c) && ...
-        (isscalar(c) || (isvector(c) && length(c) == n)))
+if ~(isfloat(lambda) && isreal(lambda) && isscalar(lambda) && lambda > 0)
     error('pli_linsvm_prob:invalidarg', ...
-        'c should be either a scalar or a real vector of length n.');
+        'lambda should be a positive real scalar.');
 end
 
 %% main
@@ -57,10 +56,10 @@ if size(y, 2) > 1; y = y.'; end % turn y into a column
 
 sd = d + n + 1;
 
-H = sparse(1:d, 1:d, 1, sd, sd);
+H = sparse(1:d, 1:d, double(lambda), sd, sd);
 
 f = zeros(sd, 1);
-f(d+2:sd) = c;
+f(d+2:sd) = (1/n);
 
 A = [bsxfun(@times, X.', -y), -y,  sparse(1:n, 1:n, -1, n, n)];
 b = - ones(n, 1);

@@ -35,10 +35,14 @@ y = [ones(1, n), -ones(1, n)];
 
 %% Solve SVM
 
+lambda = 1.0e-3;
+
 switch solver    
 
     case {'ip', 'gurobi'}
-        c = 1000 / n;
+        
+        %lambda0 = 0;
+        %h = 0;
         
         opts = [];        
         if strcmp(solver, 'ip')
@@ -48,23 +52,24 @@ switch solver
         end
         
         tic;
-        [w, w0, ~, objv] = pli_linsvm(X, y, c, solver, opts);
+        [w, w0, ~, objv] = pli_linsvm(X, y, lambda, solver, opts);
         solve_time = toc;
         
     case 'bfgs'
         
-        c = 1000 / n;
+        %lambda0 = lambda * 1.0e-4;
+
         h = 0.1;
         opts = pli_optimset('bfgs', 'display', 'iter');
         
         solfun = @(f, x) pli_fminbfgs(f, x, opts);
         
         tic; 
-        [w, w0, objv] = pli_directsvm(X, y, c, h, [], solfun);
+        [w, w0, objv] = pli_directsvm(X, y, lambda, h, [], solfun);
         solve_time = toc;        
                 
     case 'pegasos'   
-        lambda = 1e-3;
+
         T = 200 / lambda;
         aug = 10;
         
@@ -83,7 +88,13 @@ disp('Solutions');
 disp('=============');
 display(w);
 display(w0);
-if ~isempty(objv)
+
+
+if ~isempty(objv)    
+    % DEBUG
+    % objv0 = pli_linsvm_objv(X, y, lambda, lambda0, h, w, w0);
+    % fprintf('objv-dev = %g\n', abs(objv - objv0));
+    
     display(objv);
 end
 

@@ -1,19 +1,18 @@
-function [w, w0, objv] = pli_directsvm(X, y, c, h, s0, solver)
+function [w, w0, objv] = pli_directsvm(X, y, lambda, h, s0, solver)
 %PLI_DIRECTSVM Solve SVM by directly optimizing the primal function
 %
 %   The objective function is given by 
 %
-%       (1/2) ||w||^2 + r0 * w0^2 + 
-%       sum_i c * huber_loss(y_i * (w' * x_i + w0))
+%       (lambda/2) ||w||^2 + (lambda0/2) * w0^2 + 
+%       (1/n) * sum_i huber_loss(y_i * (w' * x_i + w0))
 %
 %   Here, 
 %                         0                     (if u >= 1 + h)
 %       huber_loss(u) =   (1 + h - u)^2 / (4h)  (if |1-u| < h)
 %                         1 - u                 (if u <= 1 - h)
 %
-%   The coefficient r0 is often set to a very small value, which 
-%   is 1e-6 in this function.
-%
+%   The coefficient lambda0 is often set to a very small value, which 
+%   is 1e-4 * lambda in this function.
 %
 %   [w, w0] = PLI_DIRECTSVM(X, y, c);
 %   [w, w0] = PLI_DIRECTSVM(X, y, c, h);
@@ -68,10 +67,12 @@ if ~(isfloat(y) && isreal(y) && isvector(y) && length(y) == n)
 end
 if size(y, 1) > 1; y = y.'; end
 
-if ~(isfloat(c) && isreal(c) && isscalar(c) && c > 0)
+if ~(isfloat(lambda) && isreal(lambda) && isscalar(lambda) && lambda > 0)
     error('pli_directsvm:invalidarg', ...
-        'c should be either a positive real scalar.');
+        'lambda should be a positive real scalar.');
 end
+
+lambda0 = lambda * 1.0e-4;
 
 if nargin < 4
     h = 0.1;
@@ -100,76 +101,15 @@ else
     end
 end
 
-r0 = 1.0e-6;
+
 
 %% main
 
-[sol, objv] = solver(@objfun, s0);
+objfun = @(s) pli_linsvm_objv(X, y, lambda, lambda0, h, s(1:d), s(d+1));
+
+[sol, objv] = solver(objfun, s0);
 
 w = sol(1:d);
 w0 = sol(d+1);
-
-
-%% objective function
-
-    function [objv, g] = objfun(s)
-        
-        t = s(1:d);
-        t0 = s(d+1);
-        
-        rv = 0.5 * norm(t)^2 + (0.5 * r0) * (t0^2);
-        
-        u = y .* (t' * X + t0);
-        sv = find(u < 1 + h);
-        
-        % evaluate objective
-        
-        if isempty(sv)
-            tloss = 0;
-        else
-            u_sv = u(sv);
-            in_q = (u_sv > 1 - h);
-            il = find(~in_q);
-            iq = find(in_q);
-            
-            if isempty(il)
-                tloss_l = 0;
-            else
-                tloss_l = sum(1 - u_sv(il));
-            end
-            
-            if isempty(iq)
-                tloss_q = 0;
-            else
-                tloss_q = sum((1 + h - u_sv(iq)).^2) / (4*h);
-            end
-            
-            tloss = c * (tloss_l + tloss_q); 
-        end
-            
-        objv = rv + tloss;
-        
-        % evaluate gradient (upon request)
-        
-        if nargout >= 2
-            
-            if isempty(sv)
-                g = [t; t0 * r0];
-            
-            else
-                X_sv = X(:, sv);
-                y_sv = y(sv);
-                
-                a = (max(u_sv, 1-h) - (1+h)) * (1/(2*h));
-                ya = y_sv .* a;
-                
-                g = [(X_sv * ya') * c + t; sum(ya) * c + t0 * r0];
-            end
-        end
-
-    end
-
-end
-
 
 
