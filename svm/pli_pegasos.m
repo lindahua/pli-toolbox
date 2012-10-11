@@ -135,7 +135,10 @@ for t = 1 : T
     eta = 1 / (lambda * t); 
     
     % update w
-    w = (1 - eta * lambda) * w;
+    rp = (1 - eta * lambda);    
+    w = rp * w;
+    w0 = rp * w0;
+    
     if yt * ut < 1
         w = w + eta * (yt * xt);
         w0 = w0 + eta * (yt * aug);

@@ -79,6 +79,8 @@ struct Program
             
             double rp = 1 - eta * lambda;
             w *= rp;
+            if (aug) b *= rp;
+            
             
             if (y * u < 1.0)
             {
@@ -95,8 +97,7 @@ struct Program
             if (s > 1)
             {
                 s = 1 / std::sqrt(s);
-                w *= s;
-                
+                w *= s;                
                 if (aug) b *= s;
             }
         }
