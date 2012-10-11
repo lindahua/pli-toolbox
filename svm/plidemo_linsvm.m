@@ -8,7 +8,7 @@ function plidemo_linsvm(n, solver)
 %       Here, n is the number of samples of each class.
 %       The default value of n is 500;
 %
-%       solver is either 'ip', 'gurobi', or 'pegasos'.       
+%       solver is either 'ip', 'gurobi', 'bfgs', or 'pegasos'.       
 %
 
 %% arguments
@@ -38,7 +38,7 @@ y = [ones(1, n), -ones(1, n)];
 switch solver    
 
     case {'ip', 'gurobi'}
-        c = 10;
+        c = 1000 / n;
         
         opts = [];        
         if strcmp(solver, 'ip')
@@ -50,6 +50,18 @@ switch solver
         tic;
         [w, w0, ~, objv] = pli_linsvm(X, y, c, solver, opts);
         solve_time = toc;
+        
+    case 'bfgs'
+        
+        c = 1000 / n;
+        h = 0.1;
+        opts = pli_optimset('bfgs', 'display', 'iter');
+        
+        solfun = @(f, x) pli_fminbfgs(f, x, opts);
+        
+        tic; 
+        [w, w0, objv] = pli_directsvm(X, y, c, h, [], solfun);
+        solve_time = toc;        
                 
     case 'pegasos'   
         lambda = 1e-3;
