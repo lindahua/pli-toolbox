@@ -51,7 +51,7 @@ end
 n = size(X, 2);
 
 rv = (0.5 * lambda) * norm(theta)^2;
-if use_bias && lambda0 > 0
+if use_bias && bias > 0
      rv = rv + (0.5 * lambda0) * (bias^2);
 end
 

@@ -45,8 +45,14 @@ function [w, w0] = pli_pegasos(X, y, lambda, lambda0, t0, K, w, w0)
 aug = sqrt(lambda / lambda0);
 code = 1;
 
-[w, w0] = svm_sgdx_cimp(X, y, lambda, aug, t0, K, code, w, w0);
+if aug > 0
+    w0_ = w0 / aug;
+else
+    w0_ = 0;
+end
 
+[w, w0_] = svm_sgdx_cimp(X, y, lambda, aug, t0, K, code, w, w0_);
+w0 = w0_ * aug;
 
 function [w, w0] = ref_pegasos(X, y, t, lambda, aug, w, w0) 
 
@@ -65,9 +71,9 @@ w0 = rp * w0;
 k = size(X, 2);
 r = eta / k;
 for i = 1 : size(X, 2)
-    if y(i) * u(i) < 1
-        w = w + r * (y(i) * X(:,i));
-        w0 = w0 + r * (y(i) * aug);
+    if y(i) * u(i) < 1        
+        w = w + (r * y(i)) * X(:,i);
+        w0 = w0 + (r * y(i)) * aug;
     end    
 end
 

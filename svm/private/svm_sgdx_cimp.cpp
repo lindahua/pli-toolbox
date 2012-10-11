@@ -60,7 +60,18 @@ public:
         for (index_t i = 0; i < d; ++i) _w[i] *= c;
     }
     
+    LMAT_ENSURE_INLINE
+    double operator[] (index_t i) const
+    {
+        return _w[i];
+    }
     
+    LMAT_ENSURE_INLINE
+    double bias() const
+    {
+        return 0;
+    }
+        
 private:    
     vec_t _w;    
 };
@@ -101,7 +112,7 @@ public:
     
     LMAT_ENSURE_INLINE
     void add_mul(const cvec_t& x, double c)
-    {
+    {                
         const index_t d = _w.nrows();
         for (index_t i = 0; i < d; ++i) _w[i] += c * x[i];
         _w0 += c * _aug;
@@ -113,6 +124,18 @@ public:
         const index_t d = _w.nrows();
         for (index_t i = 0; i < d; ++i) _w[i] *= c;
         _w0 *= c;
+    }
+    
+    LMAT_ENSURE_INLINE
+    double operator[] (index_t i) const
+    {
+        return _w[i];
+    }
+    
+    LMAT_ENSURE_INLINE
+    double bias() const
+    {
+        return _w0;
     }
         
 private:    
@@ -180,7 +203,7 @@ template<class WVec>
 class Pegasos
 {
 public:
-    Pegasos(WVec& wvec, double lambda, index_t t0, index_t maxK) 
+    Pegasos(WVec& wvec, double lambda, double t0, index_t maxK) 
     : _wvec(wvec), _lambda(lambda), _time(t0), _us(maxK) { }
     
     void learn(const cvec_t& x, double y)
@@ -243,7 +266,7 @@ public:
     LMAT_ENSURE_INLINE
     double learn_rate() const
     {
-        return 1.0 / (_lambda * double(_time));
+        return 1.0 / (_lambda * _time);
     }
     
     
@@ -251,7 +274,7 @@ private:
     WVec& _wvec;
     const double _lambda;
     
-    index_t _time;
+    double _time;
     
     dblock<double> _us;
 };
@@ -285,7 +308,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double lambda = mLam.get_scalar();
     double aug = mAug.get_scalar();
     
-    index_t t0 = (index_t)mT0.get_scalar();
+    double t0 = mT0.get_scalar();
     index_t K = (index_t)mK.get_scalar();
     index_t code = (index_t)mCode.get_scalar();
     

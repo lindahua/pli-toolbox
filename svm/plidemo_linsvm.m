@@ -77,7 +77,7 @@ switch solver
         h = 0;
         
         tic;
-        [w, w0] = pli_pegasos(X, y, lambda, lambda0, T);
+        [w, w0] = pli_linsvm_sgdx(X, y, lambda, lambda0, 'T', T);        
         solve_time = toc;   
         
         objv = [];
