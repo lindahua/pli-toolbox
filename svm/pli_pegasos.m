@@ -52,6 +52,7 @@ else
 end
 
 [w, w0_] = svm_sgdx_cimp(X, y, lambda, aug, t0, K, code, w, w0_);
+
 w0 = w0_ * aug;
 
 function [w, w0] = ref_pegasos(X, y, t, lambda, aug, w, w0) 
@@ -70,8 +71,8 @@ w0 = rp * w0;
 
 k = size(X, 2);
 r = eta / k;
-for i = 1 : size(X, 2)
-    if y(i) * u(i) < 1        
+for i = 1 : size(X, 2)    
+    if y(i) * u(i) < 1            
         w = w + (r * y(i)) * X(:,i);
         w0 = w0 + (r * y(i)) * aug;
     end    

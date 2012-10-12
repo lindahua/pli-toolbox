@@ -26,6 +26,12 @@ public:
     WeightVec(marray mW)
     : _w(mW.ptr_real(), mW.nrows(), 1) { }
     
+        
+    LMAT_ENSURE_INLINE
+    index_t dim() const
+    {
+        return _w.nrows();
+    }    
     
     LMAT_ENSURE_INLINE
     double sqnorm() const
@@ -88,6 +94,11 @@ public:
     , _aug(aug)
     { }
     
+    LMAT_ENSURE_INLINE
+    index_t dim() const
+    {
+        return _w.nrows();
+    }    
         
     LMAT_ENSURE_INLINE
     double sqnorm() const
@@ -112,7 +123,7 @@ public:
     
     LMAT_ENSURE_INLINE
     void add_mul(const cvec_t& x, double c)
-    {                
+    {                        
         const index_t d = _w.nrows();
         for (index_t i = 0; i < d; ++i) _w[i] += c * x[i];
         _w0 += c * _aug;
@@ -158,40 +169,25 @@ void run_sgdx(
     
     const index_t d = Xstream.nrows();
     const index_t n = Xstream.ncolumns();
-            
-    if (K == 1)
-    {        
-        for (index_t i = 0; i < n; ++i)
-        {
-            cvec_t x = Xstream.column(i);
-            double y = Ystream[i];
-            
-            trainer.learn(x, y);
-        }
-    }    
-    else
-    {    
-        index_t rn = n;
-        index_t i = 0;
         
-        for ( ;rn >= K; rn -= K, i += K)
-        {        
-            cmat_t X(Xstream.ptr_col(i), d, K);
-            cvec_t Y(Ystream.ptr_data() + i, K, 1);
+    index_t rn = n;
+    index_t i = 0;
+    
+    for ( ;rn >= K; rn -= K, i += K)
+    {
+        const double *pX = Xstream.ptr_col(i);
+        const double *pY = Ystream.ptr_data() + i;
         
-            trainer.learn(X, Y);
-        }
+        trainer.learn(pX, pY, K);
+    }
+    
+    if (rn > 0)
+    {                
+        const double *pX = Xstream.ptr_col(i);
+        const double *pY = Ystream.ptr_data() + i;
         
-        if (rn > 0)
-        {
-            range rgn(i, rn);
-            
-            cmat_t X(Xstream.ptr_col(i), d, rn);
-            cvec_t Y(Ystream.ptr_data() + i, rn, 1);
-            
-            trainer.learn(X, Y);
-        }
-    }    
+        trainer.learn(pX, pY, rn);
+    }   
     
 }
 
@@ -199,84 +195,106 @@ void run_sgdx(
 // training algorithms
 
 
+
+/**
+ * w = alpha * w + (eta/k) sum_{i in A} y_i x_i
+ *
+ * Here, A is the set of support vectors, i.e. u * y < 1 
+ */
+template<class WVec>
+void update_weight_vec(WVec& wvec, double alpha, 
+        const double *pX, const double *pY, const index_t k, 
+        double *us, double eta)
+{
+    const index_t d = wvec.dim();     
+    
+    if (k == 1)
+    {         
+        cvec_t x(pX, d, 1);
+        
+        // predict
+                       
+        us[0] = wvec.predict(x);
+        
+        // update
+        
+        if (alpha != 1) wvec *= alpha;
+        
+        double y = *pY;
+        if (y * us[0] < 1.0)
+            wvec.add_mul(x, y * eta);
+    }
+    else
+    {
+        double r = eta / double(k);
+        
+        // predict
+        
+        for (index_t i = 0; i < k; ++i)
+        {
+            cvec_t x(pX + i * d, d, 1);
+            us[i] = wvec.predict(x);
+        }
+        
+        // update
+        
+        if (alpha != 1) wvec *= alpha;
+        
+        for (index_t i = 0; i < k; ++i)
+        {
+            double y = pY[i];           
+            
+            if (y * us[i] < 1.0)
+            {
+                cvec_t x(pX + i * d, d, 1);                
+                wvec.add_mul(x, y * r);
+            }
+        }
+    }
+}
+
+
+
 template<class WVec>
 class Pegasos
 {
 public:
     Pegasos(WVec& wvec, double lambda, double t0, index_t maxK) 
-    : _wvec(wvec), _lambda(lambda), _time(t0), _us(maxK) { }
-    
-    void learn(const cvec_t& x, double y)
-    {
-        ++ _time;
-                        
-        // make prediction
-        
-        double u = _wvec.predict(x);
-        
-        // update w
-        
-        double eta = learn_rate();
-        
-        _wvec *= (1 - eta * _lambda); 
-        
-        if (y * u < 1.0)
-            _wvec.add_mul(x, y * eta);
-        
-        
-        // rescale w
-        
-        double s = _wvec.sqnorm() * _lambda;        
-        if (s > 1)
-            _wvec *= (1 / std::sqrt(s));        
-    }
-    
-    void learn(const cmat_t& X, const cvec_t& Y)
-    {
-        ++ _time;
-                                
-        // make predictions
-        
-        const index_t k = X.ncolumns();
-        for (index_t i = 0; i < k; ++i)
-            _us[i] = _wvec.predict(X.column(i));
-        
-        // update w
-        
-        double eta = learn_rate(); 
-        
-        _wvec *= (1 - eta * _lambda);        
-        
-        double r = eta / double(k);        
-        for (index_t i = 0; i < k; ++i)
-        {
-            double y = Y[i];
-            if (y * _us[i] < 1.0) 
-                _wvec.add_mul(X.column(i), y * r);
-        }
+    : _wvec(wvec), _lambda(lambda), _time(t0), _us_blk(maxK) { }
                 
-        // rescale w
-        
-        double s = _wvec.sqnorm() * _lambda;        
-        if (s > 1)
-            _wvec *= (1 / std::sqrt(s)); 
-    }
-    
-    
     LMAT_ENSURE_INLINE
     double learn_rate() const
     {
         return 1.0 / (_lambda * _time);
     }
     
-    
+    LMAT_ENSURE_INLINE
+    void learn(const double *pX, const double *pY, const index_t k)
+    {
+        ++ _time;
+        
+        // add support vectors
+        
+        double *us = _us_blk.ptr_data();
+        double eta = learn_rate();
+        
+        update_weight_vec(_wvec, 1 - eta * _lambda, 
+                pX, pY, k, us, eta);
+        
+        // rescale w
+        
+        double s = _wvec.sqnorm() * _lambda;
+        if (s > 1)
+            _wvec *= (1 / std::sqrt(s));        
+    }
+
 private:
     WVec& _wvec;
     const double _lambda;
     
     double _time;
     
-    dblock<double> _us;
+    dblock<double> _us_blk;
 };
 
 
@@ -340,3 +358,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     plhs[0] = mW;
     plhs[1] = mW0;
 }
+
+
