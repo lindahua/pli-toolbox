@@ -27,8 +27,10 @@ t = pi / 3;
 R = [cos(t) -sin(t); sin(t) cos(t)];
 Z = R * diag([4, 1]) * randn(2, 2 * n);
 
-Xp = bsxfun(@plus, Z(:, 1:n), [0 0]');
-Xn = bsxfun(@plus, Z(:, n+1:2*n), [10 0]');
+xcen = 5;
+
+Xp = bsxfun(@plus, Z(:, 1:n), [xcen - 5, 0]');
+Xn = bsxfun(@plus, Z(:, n+1:2*n), [xcen + 5, 0]');
 
 X = [Xp, Xn];
 y = [ones(1, n), -ones(1, n)];
@@ -77,10 +79,25 @@ switch solver
         h = 0;
         
         tic;
-        [w, w0] = pli_linsvm_sgdx(X, y, lambda, lambda0, 'T', T);        
+        [w, w0] = pli_linsvm_sgdx(X, y, lambda, lambda0, ...
+            'algorithm', 'pegasos', 'T', T); 
+        
         solve_time = toc;   
         
         objv = [];
+        
+    case 'sgd-qn'   
+
+        T = 1000 / lambda;
+        lambda0 = 0.01 * lambda;
+        h = 0;
+        
+        tic;
+        [w, w0] = pli_linsvm_sgdx(X, y, lambda, lambda0, ...
+            'algorithm', 'sgd-qn', 'T', T);
+        solve_time = toc;   
+        
+        objv = [];        
 end
 
 % show solution

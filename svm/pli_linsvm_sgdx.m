@@ -55,6 +55,9 @@ function [w, w0, objv] = pli_linsvm_sgdx(X, y, lambda, lambda0, varargin)
 %                   at the end of each epoch.
 %                   (default = 1).
 %
+%   - skip :        The interval (in terms of the number of iterations)
+%                   between evaluation of B. (default = 1).
+%
 %   - w_init :      Initial coefficient vector. (default = zeros(d,1)).
 %
 %   - w0_init :     Initial bias value (default = 0).
@@ -89,6 +92,7 @@ end
 opts.algorithm = 'pegasos';
 opts.T = 100 / lambda;
 opts.k = 1;
+opts.skip = 1;
 opts.epoches = 1;
 opts.w_init = [];
 opts.w0_init = [];
@@ -102,18 +106,26 @@ end
 
 T = opts.T;
 k = opts.k;
+skip = opts.skip;
 m = opts.epoches;
 
 % initialize
 
+if ~isa(X, 'double'); X = double(X); end
+if ~isa(y, 'double'); y = double(y); end
+
 w = opts.w_init;
 if isempty(w)
     w = zeros(d, 1);
+else
+    if ~isa(w, 'double'); w = double(w); end
 end
 
 w0 = opts.w0_init;
 if isempty(w0)
     w0 = 0;
+else
+    w0 = double(w0);
 end
 
 % select core algorithm
@@ -124,7 +136,13 @@ switch lower(opts.algorithm)
             @(x, y, t, w, w0) pli_pegasos(x, y, lambda, lambda0, t, k, w, w0);
                     
     case 'sgd-qn'
-        error('sgd-qn has not been implemented yet.');
+        if k ~= 1
+            error('pli_linsvm_sgdx:invalidarg', ...
+                'k must be 1 for algorithm sgd-qn.');
+        end
+        
+        corefun = ...
+            @(x, y, t, w, w0) pli_sgdqn(x, y, lambda, lambda0, t, skip, w, w0);
         
     otherwise
         error('pli_linsvm_sgdx:invalidarg', ...
@@ -177,6 +195,12 @@ v = opts.k;
 if ~(isnumeric(v) && isreal(v) && isscalar(v) && v == fix(v) && v >= 1)
     error('pli_linsvm_sgdx:invalidarg', ...
         'The value for option k should be a positive integer.');
+end
+
+v = opts.skip;
+if ~(isnumeric(v) && isreal(v) && isscalar(v) && v == fix(v) && v >= 1)
+    error('pli_linsvm_sgdx:invalidarg', ...
+        'The value for option skip should be a positive integer.');
 end
 
 v = opts.epoches;

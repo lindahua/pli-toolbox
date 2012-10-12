@@ -1,6 +1,6 @@
 /********************************************************************
  *
- *  C++ mex implementation on a Extended SGD for SVM
+ *  C++ mex implementation of Pegasos for SVM
  *
  ********************************************************************/
 

@@ -34,6 +34,7 @@ lst_metrics = { ...
 
 lst_svm = { ...
     'pegasos_cimp',  'svm/private', '$/pegasos_cimp.cpp'
+    'sgdqn_cimp',    'svm/private', '$/sgdqn_cimp.cpp'
 };
 
 lst = [lst_common; lst_metrics; lst_svm];
