@@ -32,11 +32,11 @@ y = [ones(1, n), zeros(1, n)];
 lambda = 0.001 * n;
 lambda0 = lambda * 0.02;
 
-opts = pli_optimset('bfgs', 'display', 'iter');
-solver = @(f, x) pli_fminbfgs(f, x, opts);
+opts = pli_optimset('method', 'newton', ...
+    'display', 'iter', 'tolfun', 1.0e-14);
 
 tic;
-[theta, bias] = pli_logireg(X, y, [], lambda, lambda0, [], solver);
+[theta, bias] = pli_logireg(X, y, [], lambda, lambda0, [], opts);
 solve_time = toc;
 
 fprintf('Solve time = %f sec\n', solve_time);

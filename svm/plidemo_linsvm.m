@@ -1,14 +1,14 @@
-function plidemo_linsvm(n, solver)
+function plidemo_linsvm(n, method)
 %PLIDEMO_LINSVM Demonstrates the use of linear SVM
 %
 %   PLIDEMO_LINSVM();
 %   PLIDEMO_LINSVM(n);
-%   PLIDEMO_LINSVM(n, solver);
+%   PLIDEMO_LINSVM(n, method);
 %
 %       Here, n is the number of samples of each class.
 %       The default value of n is 500;
 %
-%       solver is either 'ip', 'gurobi', 'bfgs', or 'pegasos'.       
+%       method is either 'ip', 'gurobi', 'bfgs', or 'pegasos'.       
 %
 
 %% arguments
@@ -18,7 +18,7 @@ if nargin < 1
 end
 
 if nargin < 2
-    solver = 'ip';
+    method = 'ip';
 end
 
 %% Data generation
@@ -39,7 +39,7 @@ y = [ones(1, n), -ones(1, n)];
 
 lambda = 1.0e-3;
 
-switch solver    
+switch method    
 
     case {'ip', 'gurobi'}
         
@@ -47,14 +47,14 @@ switch solver
         h = 0;
         
         opts = [];        
-        if strcmp(solver, 'ip')
+        if strcmp(method, 'ip')
             opts = optimset('Display', 'iter');
-        elseif strcmp(solver, 'gurobi')
+        elseif strcmp(method, 'gurobi')
             opts.outputflag = 1;
         end
         
         tic;
-        [w, w0, ~, objv] = pli_linsvm(X, y, lambda, solver, opts);
+        [w, w0, ~, objv] = pli_linsvm(X, y, lambda, method, opts);
         solve_time = toc;
         
     case 'bfgs'
@@ -62,15 +62,15 @@ switch solver
         % lambda0 = lambda * 1.0e-4;
         
         lambda = 1.0e-3;
-        lambda0 = 1.0e-4;
+        lambda0 = 0.01 * lambda;
 
         h = 0.1;
         
-        opts = pli_optimset('bfgs', 'display', 'iter');
-        solfun = @(f, x) pli_fminbfgs(f, x, opts);
-
+        opts = pli_optimset('method', method, ...
+            'display', 'iter', 'tolfun', 1e-12);
+        
         tic; 
-        [w, w0, objv] = pli_directsvm(X, y, lambda, h, [], solfun);
+        [w, w0, objv] = pli_directsvm(X, y, lambda, h, [], opts);
         solve_time = toc;     
                 
     case 'pegasos'   

@@ -1,4 +1,4 @@
-function [w, w0, objv] = pli_directsvm(X, y, lambda, h, s0, solver)
+function [w, w0, objv] = pli_directsvm(X, y, lambda, h, s0, opts)
 %PLI_DIRECTSVM Solve SVM by directly optimizing the primal function
 %
 %   The objective function is given by 
@@ -17,10 +17,14 @@ function [w, w0, objv] = pli_directsvm(X, y, lambda, h, s0, solver)
 %   [w, w0] = PLI_DIRECTSVM(X, y, c);
 %   [w, w0] = PLI_DIRECTSVM(X, y, c, h);
 %   [w, w0] = PLI_DIRECTSVM(X, y, c, h, s0);
-%   [w, w0] = PLI_DIRECTSVM(X, y, c, h, s0, solver);
+%   [w, w0] = PLI_DIRECTSVM(X, y, c, h, s0, opts);
 %
 %       Learns SVM from given data by directly optimizing the primal
 %       objective function (in uncontrained form with huber loss).
+%
+%       This function calls pli_fminunc to find the minima. One can 
+%       input an option struct (opts) to control the optimization
+%       procedure. This struct can be constructed using pli_optimset.
 %
 %   [w, w0, objv] = PLI_DIRECTSVM( ... );
 %
@@ -93,21 +97,20 @@ else
 end
 
 if nargin < 6
-    solver = @pli_fminbfgs;
+    opts = pli_optimset();
 else
-    if ~isa(solver, 'function_handle')
+    if ~isstruct(opts)
         error('pli_directsvm:invalidarg', ...
-            'solver should be a function handle.');
+            'opts should be a struct (constructed by pli_optimset).');
     end
 end
-
 
 
 %% main
 
 objfun = @(s) pli_linsvm_objv(X, y, lambda, lambda0, h, s(1:d), s(d+1));
 
-[sol, objv] = solver(objfun, s0);
+[sol, objv] = pli_fminunc(objfun, s0, opts);
 
 w = sol(1:d);
 w0 = sol(d+1);

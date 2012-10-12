@@ -1,4 +1,4 @@
-function [theta, theta0] = pli_logireg(X, y, w, lambda, lambda0, s0, solver)
+function [theta, theta0] = pli_logireg(X, y, w, lambda, lambda0, s0, opts)
 %PLI_LOGIREG Solves a logistic regression problem
 %
 %   Logistic regression is to minimize the following problem w.r.t.
@@ -19,7 +19,7 @@ function [theta, theta0] = pli_logireg(X, y, w, lambda, lambda0, s0, solver)
 %   [theta, theta0] = PLI_LOGIREG(X, y, w, lambda);
 %   [theta, theta0] = PLI_LOGIREG(X, y, w, lambda, lambda0);
 %   [theta, theta0] = PLI_LOGIREG(X, y, w, lambda, lambda0, s0);
-%   [theta, theta0] = PLI_LOGIREG(X, y, w, lambda, lambda0, s0, solver);
+%   [theta, theta0] = PLI_LOGIREG(X, y, w, lambda, lambda0, s0, opts);
 %
 %       Solves the logistic regression problem.
 %
@@ -52,13 +52,20 @@ function [theta, theta0] = pli_logireg(X, y, w, lambda, lambda0, s0, solver)
 %               When lambda0 is inf, it should be a d-dimensional vector,
 %               which is just for theta.
 %
+%   - opts :    The options for pli_fminunc to solve the optimization
+%               problem. One can use pli_optimset to construct this
+%               struct.
 %
-%   - solver :  A function handle to solve the optimization problem,
-%               which can be called as 
 %
-%                   x = solver(f, x0).
+%   [theta, theta0] = PLI_LOGIREG(X, y, w, lambda, lambda0, s0, solver);
 %
-%               By default, @pli_fminbfgs is used.
+%       One can also supply his own solver to solve the problem instead
+%       of using pli_fminunc.
+%
+%       Here, solver is a function handle for optimization that supports 
+%       the following syntax.
+%
+%           x_opt = solver(f, x)
 %
 
 %% Argument checking
@@ -116,11 +123,15 @@ else
 end
 
 if nargin < 7
-    solver = @pli_fminbfgs;
+    solver = @pli_fminunc;
 else
-    if ~isa(solver, 'function_handle')
+    if isstruct(opts)
+        solver = @(f, x) pli_fminunc(f, x, opts);
+    elseif isa(opts, 'function_handle')
+        solver = opts;
+    else
         error('pli_logireg:invalidarg', ...
-            'solver should be a function handle.');
+            'The last argument is invalid.');
     end
 end
 
