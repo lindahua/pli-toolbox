@@ -1,4 +1,4 @@
-function [v, g] = pli_linsvm_objv(X, y, lambda, lambda0, h, theta, bias)
+function [v, g, H] = pli_linsvm_objv(X, y, lambda, lambda0, h, theta, bias)
 %PLI_LINSVM_OBJV Objective function of Linear SVM
 %
 %   The objective function is defined to be
@@ -29,12 +29,20 @@ function [v, g] = pli_linsvm_objv(X, y, lambda, lambda0, h, theta, bias)
 %       Evaluates the linear SVM objective as above. When bias is not
 %       given, it is assumed to be fixed to zero.
 %
-%   [v, g] = PLI_LINSVM_OBJV(X, y, lambda, lambda0, h, theta);
-%   [v, g] = PLI_LINSVM_OBJV(X, y, lambda, lambda0, h, theta, bias);
+%   [v, g] = PLI_LINSVM_OBJV(X, y, ...);
 %
 %       Additionally evaluates the gradient w.r.t. [theta; bias] 
 %       or w.r.t. theta (depending on whether bias is given).
 %
+%   [v, g, H] = PLI_LINSVM_OBJV(X, y, ...);
+%
+%       Additionally evaluates the Hessian matrix.
+%
+%       While this function provides Hessian matrix evaluation,
+%       using Newton-Raphson directly based on this Hessian matrix
+%       is strongly discouraged, as second-order curvature vanishes
+%       in most areas. In practice, BFGS works much better and is
+%       recommended for direct SVM optimization.
 %   
 %   This function is supposed to be called within an optimization 
 %   procedure. For efficiency, no argument checking is performed.
@@ -48,7 +56,7 @@ else
     use_bias = 1;
 end
 
-n = size(X, 2);
+[d, n] = size(X);
 
 rv = (0.5 * lambda) * norm(theta)^2;
 if use_bias && bias > 0
@@ -119,6 +127,32 @@ if nargout >= 2
         
         g = [g; g0];
     end       
+end
+
+%% Hessian
+
+if nargout >= 3
+    
+    if use_bias
+        dvs = [ones(d, 1) * lambda; lambda0];
+    else
+        dvs = ones(d, 1) * lambda;
+    end
+    
+    if isempty(sv) || isempty(iq)
+        H = diag(dvs);
+    else
+        Xsq = X_sv(:, iq);
+        G = Xsq * Xsq';
+        
+        if use_bias
+            sxsq = sum(Xsq, 2);
+            G = [G, sxsq; sxsq.', numel(iq)];
+        end
+        
+        H = pli_adddiag(G, dvs);
+    end
+    
 end
 
 
