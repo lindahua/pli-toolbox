@@ -59,15 +59,16 @@ switch solver
         
     case 'bfgs'
         
-        lambda0 = lambda * 1.0e-4;
+        % lambda0 = lambda * 1.0e-4;
+        
+        lambda = 1.0e-3;
+        lambda0 = 1.0e-4;
 
         h = 0.1;
-        opts = pli_optimset('bfgs', 'display', 'iter');        
+        
+        opts = pli_optimset('bfgs', 'display', 'iter');
         solfun = @(f, x) pli_fminbfgs(f, x, opts);
-        
-        % opts = optimset('Gradobj', 'on', 'Display', 'iter');
-        % solfun = @(f, x) fminunc(f, x, opts);
-        
+
         tic; 
         [w, w0, objv] = pli_directsvm(X, y, lambda, h, [], solfun);
         solve_time = toc;     

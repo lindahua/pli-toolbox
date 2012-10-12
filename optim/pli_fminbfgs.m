@@ -77,13 +77,13 @@ while ~exitflag && t < maxiter;
     
     cx = x - p;
     [cv, cg] = f(cx);
-    
+        
     btrks = 0;
     
     if cv < objv
         x = cx;        
         objv = cv;
-        g = cg;                
+        g = cg;      
     else    
         eta = 1.0;
         while cv >= objv && eta > eta_lb

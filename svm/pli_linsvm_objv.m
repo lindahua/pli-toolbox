@@ -86,7 +86,7 @@ else
         end
         
         tloss = tloss_l + tloss_q;
-    end
+    end        
 end
 
 v = rv + tloss / n;
@@ -96,15 +96,14 @@ v = rv + tloss / n;
 if nargout >= 2
     
     g = theta * lambda;
-    
-    if ~isempty(sv)
 
+    if ~isempty(sv)        
         X_sv = X(:, sv);
         y_sv = y(sv);
         
         ya = y_sv;
         if h > 0 && ~isempty(iq)
-            ya(iq) = ((1+h) - u_sv(iq)) * (1/(2*h));
+            ya(iq) = y_sv(iq) .* ((1+h) - u_sv(iq)) * (1/(2*h));
         end
         
         g = g - (X_sv * ya') * (1/n);
@@ -119,8 +118,38 @@ if nargout >= 2
         end
         
         g = [g; g0];
-    end
-            
+    end       
 end
+
+
+% function [v, g] = lossfun(u, h)
+% 
+% n = numel(u);
+% v = zeros(1, n);
+% 
+% il = find(u <= 1 - h);
+% iq = find(abs(1 - u) < h);
+% 
+% if ~isempty(il)
+%     v(il) = 1 - u(il);
+% end
+% 
+% if ~isempty(iq)
+%     v(iq) = ((1 + h - u(iq)).^2) * (1 / (4 * h));
+% end
+% 
+% if nargout >= 2
+%     g = zeros(1, n);
+%     
+%     if ~isempty(il)
+%         g(il) = -1;
+%     end
+%     
+%     if ~isempty(iq)
+%         g(iq) = (u(iq) - (1+h)) * (1 / (2 * h));
+%     end
+% end
+
+
 
 
