@@ -88,7 +88,6 @@ else
         error('pli_logireg:invalidarg', ...
             'w should be a real vector of length n.');
     end
-    if size(w, 2) > 1; w = w.'; end % w: column
 end
     
 
@@ -107,38 +106,32 @@ else
 end
 
 use_bias = ~isinf(lambda0);
+if use_bias
+    ds = d + 1;
+else
+    ds = d;
+end
 
 if nargin < 6 || isempty(s0)
-    s0 = zeros(d+1, 1);
-else
-    if use_bias
-        ds = d + 1;
-    else
-        ds = d;
-    end
-    
+    s0 = zeros(ds, 1);
+else    
     if ~(isfloat(s0) && isreal(s0) && isequal(size(s0), [ds 1]))
         error('pli_logireg:invalidarg', 'The value for s0 is invalid.e');
     end
 end
 
 if nargin < 7
-    solver = @pli_fminunc;
-else
-    if isstruct(opts)
-        solver = @(f, x) pli_fminunc(f, x, opts);
-    elseif isa(opts, 'function_handle')
-        solver = opts;
-    else
-        error('pli_logireg:invalidarg', ...
-            'The last argument is invalid.');
-    end
+    opts = [];
 end
 
 
 %% main
 
-s = solver(@objfun, s0);
+if use_bias
+    lambda = [lambda * ones(d, 1); lambda0];
+end
+
+s = pli_genregress(@pli_logitloss, X, y, w, lambda, s0, opts);
 
 if use_bias
     theta = s(1:d);
@@ -147,98 +140,5 @@ else
     theta = s;
     theta0 = 0;
 end
-
-
-%% objective function
-
-    function [v, g, H] = objfun(s)
-        
-        if use_bias
-            t = s(1:d);
-            t0 = s(d+1);            
-            u = (t' * X) + t0;
-        else
-            t = s;
-            u = t' * X; 
-        end
-        
-        % evaluate objective value
-                
-        loss = y .* log1p_exp(-u) + (1 - y) .* log1p_exp(u);
-        
-        if isempty(w)
-            tloss = sum(loss);
-        else
-            tloss = loss * w;
-        end
-        
-        v = (lambda/2) * (t'*t) + tloss;
-        if use_bias && lambda0 > 0
-            v = v + (lambda0/2) * (t0^2);
-        end
-        
-        % evaluate gradient (upon request)
-        
-        if nargout >= 2
-            
-            p = 1 ./ (1 + exp(-u));
-            pmy = p - y;
-            
-            if isempty(w)
-                g = X * pmy';
-            else
-                g = X * (pmy' .* w);
-            end
-            
-            g = g + lambda * t;
-            
-            if use_bias
-                if isempty(w)
-                    g0 = sum(pmy);
-                else
-                    g0 = pmy * w;
-                end
-                
-                g0 = g0 + lambda0 * t0;
-                g = [g; g0];
-            end
-        end 
-        
-        % evaluate Hessian (upon request)
-        
-        if nargout >= 3
-            
-            rho = p .* (1 - p);
-            ri = find(rho > 0);
-            
-            if ~isempty(ri)
-                Xr = X(:, ri);
-                if isempty(w)
-                    rw = rho(ri);
-                else
-                    rw = rho(ri) .* w(ri);
-                end
-                
-                G = Xr * bsxfun(@times, Xr, rw)';
-                G = 0.5 * (G + G');
-            end
-            
-            if use_bias
-                H = zeros(d+1, d+1);
-                H(1:d, 1:d) = pli_adddiag(G, lambda);
-                h = Xr * rw';
-                H(1:d, d+1) = h;
-                H(d+1, 1:d) = h;
-                H(d+1, d+1) = sum(rw) + lambda0;
-            else
-                H = pli_adddiag(G, lambda);
-            end
-            
-        end
-    end
-
-end
-
-
 
 
