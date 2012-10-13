@@ -23,6 +23,7 @@ function opts = pli_optimset(varargin)
 %   - method :      The name of the method to use:
 %                   - 'steepdesc':  Steepest descent
 %                   - 'bfgs':       Quasi-newton using BFGS update
+%                   - 'l-bfgs':     Limited-memory BFGS.
 %                   - 'cg':         Nonlinear conjugate gradient
 %                   - 'newton':     Newton-Raphson
 %                   default = 'bfgs'.
@@ -32,6 +33,10 @@ function opts = pli_optimset(varargin)
 %                   - 'f-r':    Fletcher-Reeves formula
 %                   - 'p-r':    Polak-Ribiere formula
 %                   default = 'f-r'.
+%
+%   - cache_n :     The (maximum) number of iterations to be cached.
+%                   This option is only for method 'l-bfgs'. 
+%                   default = 20.
 %   
 %   - maxiter :     Maximum number of iterations. default = 500.
 %
@@ -56,6 +61,7 @@ function opts = pli_optimset(varargin)
 
 opts.method = 'bfgs';
 opts.cgscheme = 'f-r';
+opts.cache_n = 20;
 opts.maxiter = 500;
 opts.tolgrad = 1.0e-6;
 opts.tolx = 1.0e-10;
@@ -100,7 +106,7 @@ if ~isempty(varargin)
                 end
                 
                 v = lower(v);
-                if ~any(strcmp(v, {'steepdesc', 'bfgs', 'cg', 'newton'}))
+                if ~any(strcmp(v, {'steepdesc', 'bfgs', 'l-bfgs', 'cg', 'newton'}))
                     error('pli_optimset:invalidarg', ...
                         'The value for method is invalid.');
                 end
@@ -119,12 +125,12 @@ if ~isempty(varargin)
                 end
                 opts.cgscheme = v;
                 
-            case 'maxiter'
+            case {'maxiter', 'cache_n'}
                 if ~(isnumeric(v) && isreal(v) && isscalar(v) && v >= 1)
                     error('pli_optimset:invalidarg', ...
-                        'The value for maxiter should be a positive integer.');
+                        'The value for %s should be a positive integer.', nam);
                 end
-                opts.maxiter = v;
+                opts.(nam) = v;
                 
             case {'tolgrad', 'tolx', 'tolfun'}
                 if ~(isfloat(v) && isreal(v) && isscalar(v) && v > 0)

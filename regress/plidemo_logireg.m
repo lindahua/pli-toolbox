@@ -1,10 +1,17 @@
-function plidemo_logireg(n)
+function plidemo_logireg(n, method)
 %PLIDEMO_LOGIREG Demonstrates the use of logistic regression
 %
 %   PLIDEMO_LOGIREG;
 %   PLIDEMO_LOGIREG(n);
+%   PLIDEMO_LOGIREG(n, method);
 %
 %       Here, n is the number of samples. (default n = 500);
+%
+%       method is the name of the optimization method used in 
+%       pli_fminunc (e.g. 'bfgs', 'newton', and 'l-bfgs', etc).
+%       See PLI_OPTIMSET for details.
+%
+%       Here, the default method is 'newton'.
 %
 
 %% arguments
@@ -12,6 +19,11 @@ function plidemo_logireg(n)
 if nargin < 1
     n = 500;
 end
+
+if nargin < 2
+    method = 'newton';
+end
+
 
 %% Data generation
 
@@ -32,7 +44,7 @@ y = [ones(1, n), zeros(1, n)];
 lambda = 0.001 * n;
 lambda0 = lambda * 0.02;
 
-opts = pli_optimset('method', 'newton', ...
+opts = pli_optimset('method', method, ...
     'display', 'iter', 'tolfun', 1.0e-14);
 
 tic;

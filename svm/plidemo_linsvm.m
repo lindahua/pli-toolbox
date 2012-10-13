@@ -8,7 +8,8 @@ function plidemo_linsvm(n, method)
 %       Here, n is the number of samples of each class.
 %       The default value of n is 500;
 %
-%       method is either 'ip', 'gurobi', 'bfgs', or 'pegasos'.       
+%       method is either 'ip', 'gurobi', 'bfgs', 'l-bfgs', 
+%       or 'pegasos'.       
 %
 
 %% arguments
@@ -57,7 +58,7 @@ switch method
         [w, w0, ~, objv] = pli_linsvm(X, y, lambda, method, opts);
         solve_time = toc;
         
-    case 'bfgs'
+    case {'bfgs', 'l-bfgs'}
         
         % lambda0 = lambda * 1.0e-4;
         

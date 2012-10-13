@@ -87,8 +87,15 @@ use_hess = false;
 switch opts.method
     case 'steepdesc'
         mcode = 0;
+        
     case 'bfgs'
-        mcode = 1;            
+        mcode = 1;
+        cache_n = -1;
+        
+    case 'l-bfgs'
+        mcode = 1;
+        cache_n = opts.cache_n;
+        
     case 'cg'
         mcode = 2;      
         
@@ -126,11 +133,25 @@ else
     [fval, g, H] = f(x);
 end
 
-if mcode == 1       % bfgs
-    H = eye(d);
+% prepare method-specific states
+
+if mcode == 1 
+    if cache_n < 0  % bfgs        
+        H = eye(d);
+        
+    else            % l-bfgs
+        S = zeros(d, cache_n);      % history of s: solution differences
+        Y = zeros(d, cache_n);      % history of y: gradient differences
+        rho = zeros(1, cache_n);    % history of 1 / (y' * s)
+        
+        hm = 0;     % the length of history
+        mm = 0;     % the cache division point
+    end
+    
 elseif mcode == 2   % cg
     s = 0;    
     cg_beta = 0;
+    
 end
     
  
@@ -159,15 +180,25 @@ while ~exitflag && t < maxiter
     % find search direction (using specified method)
     
     if mcode < 2
-        if mcode == 0
+        if mcode == 0       % steepdesc
             s = g;
         else
-            s = H \ g;
+            if cache_n < 0  % bfgs
+                s = H \ g;
+                
+            else            % l-bfgs
+                if hm == 0
+                    s = g;
+                else  
+                    s = lbfgs_calcdir_cimp(S, Y, rho, g, hm, mm);                    
+                end
+                
+            end
         end
     else
-        if mcode == 2
+        if mcode == 2       % cg
             s = g + cg_beta * s;
-        else
+        else                % newton
             s = H \ g;
         end
     end
@@ -253,14 +284,38 @@ while ~exitflag && t < maxiter
     
     if ~exitflag
         
-        if mcode == 1 % bfgs
-            % update H
+        if mcode == 1 
+                        
+            if cache_n < 0      % bfgs
+                % update H
+                
+                dx = x - x_pre;
+                dg = g - g_pre;
             
-            dx = x - x_pre;
-            dg = g - g_pre;
-            
-            Hdx = H * dx;
-            H = H + (dg * dg') * (1 / (dg' * dx)) - (Hdx * Hdx') * (1 / (dx' * Hdx));
+                Hdx = H * dx;
+                H = H + (dg * dg') * (1 / (dg' * dx)) ...
+                    - (Hdx * Hdx') * (1 / (dx' * Hdx));
+                
+            else                % l-bfgs
+                % update history (in a cyclic way)
+                % from old to new: [mm + 1 : hm, 1 : mm]
+                                
+                if hm < cache_n                
+                    hm = hm + 1;
+                    mm = mm + 1;
+                elseif mm < hm
+                    mm = mm + 1;
+                else
+                    mm = 1;
+                end
+                
+                new_s = x - x_pre;
+                new_y = g - g_pre;
+                              
+                S(:, mm) = new_s;
+                Y(:, mm) = new_y;
+                rho(mm) = 1.0 / (new_s' * new_y);
+            end
             
         elseif mcode == 2  % cg
             
@@ -285,6 +340,7 @@ while ~exitflag && t < maxiter
     end
         
 end
+
 
 % print final information
 
