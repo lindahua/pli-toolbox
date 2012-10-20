@@ -36,12 +36,16 @@ lst_optim = { ...
     'lbfgs_calcdir_cimp',  'optim/private', '$/lbfgs_calcdir_cimp.cpp' ...
 };
 
+lst_vq = { ...
+    'ssvq_cimp',  'vq/private', '$/ssvq_cimp.cpp'
+};
+
 lst_svm = { ...
     'pegasos_cimp',  'svm/private', '$/pegasos_cimp.cpp'
     'sgdqn_cimp',    'svm/private', '$/sgdqn_cimp.cpp'
 };
 
-lst = [lst_common; lst_metrics; lst_optim; lst_svm];
+lst = [lst_common; lst_metrics; lst_optim; lst_vq; lst_svm];
 
 lst = cell2struct(lst, ...
     {'name', 'path', 'sources'}, 2);

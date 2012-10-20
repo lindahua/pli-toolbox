@@ -1,7 +1,7 @@
-function [C, w, cbnd] = pli_streamvq(C, w, cbnd, X, kmax, varargin)
-%PLI_STREAMVQ Streaming vector quantization
+function [C, w, cbnd] = pli_ssvq(C, w, cbnd, X, kmax, varargin)
+%PLI_SSVQ Stochastic Streaming vector quantization
 %
-%   [C, w] = PLI_STREAMVQ(C, w, cbnd, X, kmax, ...);
+%   [C, w] = PLI_SSVQ(C, w, cbnd, X, kmax, ...);
 %
 %       Performs stochastic streaming vector quantization as follows.
 %
@@ -50,13 +50,21 @@ function [C, w, cbnd] = pli_streamvq(C, w, cbnd, X, kmax, varargin)
 %
 %   - shrink :  The shrinking ratio for consolidation. (default = 0.75).
 %
+%   - weights : The weights of samples, which can be either empty,
+%               indicating that all samples have unit weights, or a vector
+%               of length n.
+%               default is [].
+%
 %   - vb_intv : Display progress after every vb_intv samples have been
 %               processed. To suppress all display, set this to 0.
 %               Default = max(1, min(1000, n / 200)), here n = size(X, 2).
 %   
 %   Remarks
 %   -------
-%       One can handle a huge data set that cannot be hosted entirely
+%     - It is vitally important to first randomly permute the data set
+%       before running SSVQ.
+%
+%     - One can handle a huge data set that cannot be hosted entirely
 %       in memory by dividing it into several batches, and perform the
 %       vector quantization by repeatedly invoking this function to 
 %       update the centers, as follows
@@ -64,8 +72,12 @@ function [C, w, cbnd] = pli_streamvq(C, w, cbnd, X, kmax, varargin)
 %           C = []; w = [];
 %           for i = 1 : num_batches
 %               X = ... load the i-th batch ...
-%               [C, w, cbnd] = PLI_STREAMVQ(C, w, cbnd, X, kmax);
+%               [C, w, cbnd] = PLI_SSVQ(C, w, cbnd, X, kmax);
 %           end
+%
+%       Another strategy will be to first respectively run SSVQ on each
+%       patch and then combine them (and run SSVQ on a combined set if
+%       necessary).
 %
 
 
@@ -78,48 +90,49 @@ end
 
 if isempty(C)
     if ~isempty(w)
-        error('pli_streamvq:invalidarg', ...
+        error('pli_ssvq:invalidarg', ...
             'w should be empty when C is empty.');
     end
 else
     if ~(isfloat(w) && isvector(w) && ~issparse(w) && numel(w) == size(C,2))
-        error('pli_streamvq:invalidarg', ...
+        error('pli_ssvq:invalidarg', ...
             'w should be a real vector of length size(C,2).');
     end
 end
 
 if ~(isfloat(cbnd) && isreal(cbnd) && cbnd > 0)
-    error('pli_streamvq:invalidarg', ...
+    error('pli_ssvq:invalidarg', ...
         'cbnd should be a positive real value.');
 end
 
 if ~(isfloat(X) && isreal(X) && ismatrix(X) && ~issparse(X))
-    error('pli_streamvq:invalidarg', ...
+    error('pli_ssvq:invalidarg', ...
         'X should be a non-sparse real matrix.');
 end
 [d, n] = size(X);
 
 if ~isempty(C)
     if size(C, 1) ~= d
-        error('pli_streamvq:invalidarg', ...
+        error('pli_ssvq:invalidarg', ...
             'Sample dimensions in C and X are inconsistent.');
     end
 end
 
 
 if ~(isnumeric(kmax) && isreal(kmax) && kmax == fix(kmax) && kmax > 1)
-    error('pli_streamvq:invalidarg', ...
+    error('pli_ssvq:invalidarg', ...
         'kmax should be a positive integer with kmax > 1.');
 end
 
 if kmax < size(C, 2)
-    error('pli_streamvq:invalidarg', 'size(C, 2) exceeds kmax.');
+    error('pli_ssvq:invalidarg', 'size(C, 2) exceeds kmax.');
 end
 
 
 opts.beta = 0.5;
 opts.shrink = 0.75;
-opts.vb_intv = max(1, min(1000, n / 200));
+opts.weights = [];
+opts.vb_intv = max(100, min(10000, n / 200));
 
 if ~isempty(varargin)
     opts = pli_parseopts(opts, varargin);
@@ -136,7 +149,21 @@ if ~isa(C, 'double'); C = double(C); end
 if ~isa(w, 'double'); w = double(w); end
 if ~isa(X, 'double'); X = double(X); end
 
-sample_w = ones(1, n);
+if isempty(opts.weights)
+    sw = ones(1, n);
+else
+    sw = opts.weights;
+    if ~(isfloat(sw) && isreal(sw) && ~issparse(sw) && isvector(sw))
+        error('pli_ssvq:invalidarg', ...
+            'weights should be a real vector.');
+    end
+    
+    if length(sw) ~= n
+        error('pli_ssvq:invalidarg', 'weights should be of length n.');
+    end
+    
+    if ~isa(sw, 'double'); sw = double(sw); end    
+end
 
 % main loop
 
@@ -148,7 +175,7 @@ end
 
 u = rand(1, n);
 
-while i < kmax
+while i < n
     
     if i > 0
         % consolidate existing centers
@@ -160,11 +187,7 @@ while i < kmax
         end
                         
         iround = 0;
-        
-        if vb_intv
-            fprintf('Stream processing:\n');
-        end
-        
+
         while size(C, 2) > kgoal
             iround = iround + 1;
             cbnd = cbnd * (1 + opts.beta);
@@ -172,15 +195,20 @@ while i < kmax
             uc = rand(1, size(C, 2));
             
             [C, w, ~] = ...
-                pli_streamvq_cimp([], [], cbnd, C, w, uc, size(C,2), 0, vb_intv);
+                ssvq_cimp([], [], cbnd, C, w, uc, size(C,2), 0, vb_intv);
             
-            fprintf('\tround %d: K = %d\n', iround, size(C, 2));
+            fprintf('    round %d: K = %d, cbnd = %.4g\n', ...
+                iround, size(C, 2), cbnd);
         end                
     end
     
     % scan remaining samples
     
-    [C, w, i] = pli_streamvq_cimp(C, w, cbnd, X, sample_w, u, kmax, i, vb_intv); 
+    if vb_intv
+        fprintf('Stream processing:\n');
+    end
+    
+    [C, w, i] = ssvq_cimp(C, w, cbnd, X, sw, u, kmax, i, vb_intv); 
             
 end
 
