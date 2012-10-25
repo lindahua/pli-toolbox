@@ -30,6 +30,9 @@ function [C, w, cbnd] = pli_ssvq(C, w, cbnd, X, kmax, varargin)
 %   - X :       The samples to be processed: a matrix of size [d, n0].
 %
 %   - kmax :    The maximum number of centers.
+%               If one wants to remove the constraint on K, simply
+%               set kmax to any number greater than the number of 
+%               samples. 
 %
 %   Returns
 %   -------
@@ -46,7 +49,7 @@ function [C, w, cbnd] = pli_ssvq(C, w, cbnd, X, kmax, varargin)
 %   Options
 %   -------
 %   - beta :    The ratio of cost bound increasing at each iteration of
-%               the consolidation process. (default = 0.5).
+%               the consolidation process. (default = 0.2).
 %
 %   - shrink :  The shrinking ratio for consolidation. (default = 0.75).
 %
@@ -129,7 +132,7 @@ if kmax < size(C, 2)
 end
 
 
-opts.beta = 0.5;
+opts.beta = 0.2;
 opts.shrink = 0.75;
 opts.weights = [];
 opts.vb_intv = max(100, min(10000, n / 200));
@@ -197,8 +200,10 @@ while i < n
             [C, w, ~] = ...
                 ssvq_cimp([], [], cbnd, C, w, uc, size(C,2), 0, vb_intv);
             
-            fprintf('    round %d: K = %d, cbnd = %.4g\n', ...
-                iround, size(C, 2), cbnd);
+            if vb_intv
+                fprintf('    round %d: K = %d, cbnd = %.4g\n', ...
+                    iround, size(C, 2), cbnd);
+            end
         end                
     end
     
