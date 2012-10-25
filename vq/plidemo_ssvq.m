@@ -30,7 +30,7 @@ X = X(:, randperm(size(X,2)));
 
 disp('Run SSVQ ...');
 tic;
-C = pli_ssvq([], [], cbnd, X, kmax);
+C = pli_ssvq(X, [], cbnd, kmax);
 elapsed_time = toc;
 
 fprintf('Elapsed time = %.5f sec\n\n', elapsed_time);

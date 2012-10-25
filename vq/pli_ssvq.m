@@ -1,7 +1,7 @@
-function [C, w, cbnd] = pli_ssvq(C, w, cbnd, X, kmax, varargin)
+function [C, w, cbnd] = pli_ssvq(X, sw, cbnd, kmax, varargin)
 %PLI_SSVQ Stochastic Streaming vector quantization
 %
-%   [C, w] = PLI_SSVQ(C, w, cbnd, X, kmax, ...);
+%   [C, w] = PLI_SSVQ(X, sw, cbnd, kmax, ...);
 %
 %       Performs stochastic streaming vector quantization as follows.
 %
@@ -19,15 +19,13 @@ function [C, w, cbnd] = pli_ssvq(C, w, cbnd, X, kmax, varargin)
 %       This process continues until are samples are processed.
 %       
 %   Arguments
-%   ---------
-%   - C :       The initial set of centers, which can be either empty
-%               or a matrix of size [d, m0]. 
+%   ----------
+%   - X :       The samples to be processed: a matrix of size [d, n].
 %
-%   - w :       The weights associated with the initial set of centers.
+%   - sw :      The sample weights, which can be either empty or a 
+%               vector of length n.
 %
 %   - cbnd :    The initial cost bound.
-%
-%   - X :       The samples to be processed: a matrix of size [d, n0].
 %
 %   - kmax :    The maximum number of centers.
 %               If one wants to remove the constraint on K, simply
@@ -36,9 +34,9 @@ function [C, w, cbnd] = pli_ssvq(C, w, cbnd, X, kmax, varargin)
 %
 %   Returns
 %   -------
-%   - C :       The updated set of centers.
+%   - C :       The set of centers.
 %
-%   - w :       The weights associated with the updated centers.
+%   - w :       The weights associated with the centers.
 %
 %   - cbnd :    The updated cost bound.
 %
@@ -48,6 +46,10 @@ function [C, w, cbnd] = pli_ssvq(C, w, cbnd, X, kmax, varargin)
 %
 %   Options
 %   -------
+%   - init :    The init set of weighted centers, in the form as 
+%               {C, w}. Here, C is the matrix of centers, and w is 
+%               the vector of associated weights.
+%
 %   - beta :    The ratio of cost bound increasing at each iteration of
 %               the consolidation process. (default = 0.2).
 %
@@ -86,21 +88,24 @@ function [C, w, cbnd] = pli_ssvq(C, w, cbnd, X, kmax, varargin)
 
 %% argument checking
 
-if ~(isfloat(C) && isreal(C) && ismatrix(C) && ~issparse(C))
-    error('pli_streamvq:invalidarg', ...
-        'C should be a non-sparse real matrix or empty.');
+if ~(isfloat(X) && isreal(X) && ismatrix(X) && ~issparse(X))
+    error('pli_ssvq:invalidarg', ...
+        'X should be a non-sparse real matrix.');
 end
+[d, n] = size(X);
 
-if isempty(C)
-    if ~isempty(w)
-        error('pli_ssvq:invalidarg', ...
-            'w should be empty when C is empty.');
-    end
+
+if isempty(sw)
+    sw = ones(1, n);
 else
-    if ~(isfloat(w) && isvector(w) && ~issparse(w) && numel(w) == size(C,2))
+    if ~(isfloat(sw) && isreal(sw) && ~issparse(sw) && isvector(sw))
         error('pli_ssvq:invalidarg', ...
-            'w should be a real vector of length size(C,2).');
+            'weights should be a real vector.');
     end
+    
+    if length(sw) ~= n
+        error('pli_ssvq:invalidarg', 'weights should be of length n.');
+    end            
 end
 
 if ~(isfloat(cbnd) && isreal(cbnd) && cbnd > 0)
@@ -108,30 +113,14 @@ if ~(isfloat(cbnd) && isreal(cbnd) && cbnd > 0)
         'cbnd should be a positive real value.');
 end
 
-if ~(isfloat(X) && isreal(X) && ismatrix(X) && ~issparse(X))
-    error('pli_ssvq:invalidarg', ...
-        'X should be a non-sparse real matrix.');
-end
-[d, n] = size(X);
-
-if ~isempty(C)
-    if size(C, 1) ~= d
-        error('pli_ssvq:invalidarg', ...
-            'Sample dimensions in C and X are inconsistent.');
-    end
-end
-
-
 if ~(isnumeric(kmax) && isreal(kmax) && kmax == fix(kmax) && kmax > 1)
     error('pli_ssvq:invalidarg', ...
         'kmax should be a positive integer with kmax > 1.');
 end
 
-if kmax < size(C, 2)
-    error('pli_ssvq:invalidarg', 'size(C, 2) exceeds kmax.');
-end
+% parse options
 
-
+opts.init = {[], []};
 opts.beta = 0.2;
 opts.shrink = 0.75;
 opts.weights = [];
@@ -143,30 +132,58 @@ end
 
 vb_intv = opts.vb_intv;
 
+
+% check C and w
+
+if ~(iscell(opts.init) && numel(opts.init) == 2)
+    error('pli_ssvq:invalidarg', ...
+        'The option init should be a cell arry in the form of {C, w}.');
+end
+
+C = opts.init{1};
+w = opts.init{2};
+
+if ~(isfloat(C) && isreal(C) && ismatrix(C) && ~issparse(C))
+    error('pli_ssvq:invalidarg', ...
+        'Init C should be a non-sparse real matrix or empty.');
+end
+
+if isempty(C)
+    if ~isempty(w)
+        error('pli_ssvq:invalidarg', ...
+            'Init w should be empty when C is empty.');
+    end
+else
+    if ~(isfloat(w) && isvector(w) && ~issparse(w) && numel(w) == size(C,2))
+        error('pli_ssvq:invalidarg', ...
+            'Init w should be a real vector of length size(C,2).');
+    end
+end
+
+if ~isempty(C)
+    if size(C, 1) ~= d
+        error('pli_ssvq:invalidarg', ...
+            'Sample dimensions in C and X are inconsistent.');
+    end
+    
+    if kmax < size(C, 2)
+        error('pli_ssvq:invalidarg', 'size(C, 2) exceeds kmax.');
+    end
+end
+
+
 %% main
 
 % pre-process inputs
 
-if ~isa(C, 'double'); C = double(C); end
-
-if ~isa(w, 'double'); w = double(w); end
 if ~isa(X, 'double'); X = double(X); end
+if ~isa(sw, 'double'); sw = double(sw); end
 
-if isempty(opts.weights)
-    sw = ones(1, n);
-else
-    sw = opts.weights;
-    if ~(isfloat(sw) && isreal(sw) && ~issparse(sw) && isvector(sw))
-        error('pli_ssvq:invalidarg', ...
-            'weights should be a real vector.');
-    end
-    
-    if length(sw) ~= n
-        error('pli_ssvq:invalidarg', 'weights should be of length n.');
-    end
-    
-    if ~isa(sw, 'double'); sw = double(sw); end    
+if ~isempty(C)
+    if ~isa(C, 'double'); C = double(C); end
+    if ~isa(w, 'double'); w = double(w); end
 end
+
 
 % main loop
 
