@@ -20,14 +20,15 @@ function s = pli_kmpp_seed(X, K, costfun)
 
 %% argument checking
 
-if ~(ismatrix(X) && isreal(X))
-    error('pli_kmpp_seed:invalidarg', 'X should be a real matrix.');
+if ~(ismatrix(X) && isreal(X) && ~issparse(X) && ~isempty(X))
+    error('pli_kmpp_seed:invalidarg', ...
+        'X should be a non-sparse real matrix.');
 end
 n = size(X, 2);
 
-if ~(isscalar(K) && isreal(K) && K >= 1 && K < n)
+if ~(isscalar(K) && isreal(K) && K >= 1 && K <= n)
     error('pli_kmpp_seed:invalidarg', ...
-        'K should be a positive integer with 1 <= K < n.');
+        'K should be a positive integer with 1 <= K <= n.');
 end
 
 if nargin < 3 || isempty(costfun)
@@ -42,32 +43,38 @@ end
 
 %% main
 
-i = randi(n, 1);
+
 
 if K == 1
-    s = i;
+    s = randi(n, 1);
+    
 else
-    s = zeros(1, K);
-    s(1) = i;
-    
-    if use_costfun
-        ds = costfun(X(:,i), X);
-    else        
-        ds = sum(bsxfun(@minus, X, X(:,i)).^2, 1);
-    end
-    
-    for k = 2 : K
-        p = ds * (1/sum(ds));
-        i = pli_ddsample(p, 1);        
-        s(k) = i;        
+    if ~use_costfun
         
-        if use_costfun
+        if ~isa(X, 'double')
+            X = double(X);
+        end
+        
+        s = kmpp_cimp(X, rand(1, K)); 
+    else
+        i = randi(n, 1);
+        
+        s = zeros(1, K);
+        s(1) = i;
+        
+        ds = costfun(X(:,i), X);
+        
+        for k = 2 : K
+            p = ds * (1/sum(ds));
+            i = pli_ddsample(p, 1);
+            s(k) = i;
+            
             ds_k = costfun(X(:,i), X);
-        else
-            ds_k = sum(bsxfun(@minus, X, X(:,i)).^2, 1);
+            ds = min(ds, ds_k);
         end        
-        ds = min(ds, ds_k);
+        
     end
+
 end
     
 
