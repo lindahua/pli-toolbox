@@ -1,10 +1,15 @@
-function plidemo_ssvq()
+function plidemo_ssvq(op)
 %PLIDEMO_SSVQ Demonstrates the use of pli_ssvq
 %
 %   PLIDEMO_SSVQ;
 %
+%   PLIDEMO_SSVQ('mc');
+%       Uses multi-consolidation.
+%
 
 %% configuration
+
+use_mc = nargin == 1 && strcmpi(op, 'mc');
 
 d = 2;
 K = 100;
@@ -30,7 +35,11 @@ X = X(:, randperm(size(X,2)));
 
 disp('Run SSVQ ...');
 tic;
-C = pli_ssvq(X, [], cbnd, kmax);
+if use_mc
+    C = pli_ssvq_mc(X, [], cbnd, kmax);
+else
+    C = pli_ssvq(X, [], cbnd, kmax);
+end
 elapsed_time = toc;
 
 fprintf('Elapsed time = %.5f sec\n\n', elapsed_time);

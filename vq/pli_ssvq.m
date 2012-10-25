@@ -55,11 +55,6 @@ function [C, w, cbnd] = pli_ssvq(X, sw, cbnd, kmax, varargin)
 %
 %   - shrink :  The shrinking ratio for consolidation. (default = 0.75).
 %
-%   - weights : The weights of samples, which can be either empty,
-%               indicating that all samples have unit weights, or a vector
-%               of length n.
-%               default is [].
-%
 %   - vb_intv : Display progress after every vb_intv samples have been
 %               processed. To suppress all display, set this to 0.
 %               Default = max(1, min(1000, n / 200)), here n = size(X, 2).
@@ -123,7 +118,6 @@ end
 opts.init = {[], []};
 opts.beta = 0.2;
 opts.shrink = 0.75;
-opts.weights = [];
 opts.vb_intv = max(100, min(10000, n / 200));
 
 if ~isempty(varargin)
