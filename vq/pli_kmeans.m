@@ -185,7 +185,11 @@ D = pli_pw_euclidean(C, X, 'sq');
 [min_ds, L] = min(D, [], 1);
 cnts = double(pli_intcount(K, L).');
 
-objv = sum(min_ds);
+if isempty(w)
+    objv = sum(min_ds);
+else
+    objv = min_ds * w';
+end
 
 
 % Iterative update
