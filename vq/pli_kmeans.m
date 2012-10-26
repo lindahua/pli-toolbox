@@ -251,7 +251,7 @@ while ~converged && t < maxiter
         D(ui, :) = pli_pw_euclidean(Cu, X, 'sq');
         
         if ~isempty(ri)
-            Cr = X(:, pli_samplewor(n, numel(ri)));
+            Cr = X(:, pli_samplewor(size(X,2), numel(ri)));
             C(:, ri) = Cr;
             D(ri, :) = pli_pw_euclidean(Cr, X, 'sq');
         end
