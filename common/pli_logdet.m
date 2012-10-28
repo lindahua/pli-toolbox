@@ -8,6 +8,23 @@ function v = pli_logdet(A)
 %       matrix.
 %
 
-L = chol(A);
-v = 2.0 * sum(log(diag(L)));
+%% argument checking
+
+if ~(isfloat(A) && isreal(A) && ismatrix(A) && size(A,1) == size(A,2))
+    error('pli_logdet:invalidarg', ...
+        'A should be a real square matrix.');
+end
+
+
+%% main
+
+R = chol(A);
+
+diagR = diag(R);
+if issparse(diagR)
+    diagR = full(diagR);
+end
+
+v = 2.0 * sum(log(diagR));
+
 
