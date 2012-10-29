@@ -75,14 +75,15 @@ if ~(isfloat(lambda) && isvector(lambda) && isreal(lambda))
         'lambda should be a real vector/scalar.');
 end
 
-if ~(isscalar(lambda) || isequal(lambda, [d 1]))
-    error('pli_gmrfest:invalidarg', ...
-        'lambda should be either a scalar or a vector of size d-by-1.');
-end
-
 if ~(isfloat(phi0) && isreal(phi0) && isvector(phi0) && size(phi0, 2)==1)
     error('pli_gmrfest:invalidarg', ...
         'phi0 should be a real column vector.');
+end
+dp = size(phi0, 1);
+
+if ~(isscalar(lambda) || isequal(size(lambda), [dp 1]))
+    error('pli_gmrfest:invalidarg', ...
+        'lambda should be either a scalar or a vector of size dp-by-1.');
 end
 
 if ~(isfloat(bw) && isscalar(bw) && isreal(bw) && bw > 0)
