@@ -144,7 +144,7 @@ function [maxiter, tolfun, lasting, displevel] = get_opts(oplist)
 
 S = struct( ...
     'maxiter', 200, 'tolfun', 1.0e-8, 'lasting', 5, ...
-    'display', 'off');
+    'display', 'iter');
 
 if ~isempty(oplist)
     S = pli_parseopts(S, oplist);
