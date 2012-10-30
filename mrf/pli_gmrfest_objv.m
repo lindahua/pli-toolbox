@@ -1,9 +1,10 @@
-function [objv, grad] = pli_gmrfest_objv(phi, pats, S, lambda, bw)
+function [objv, grad] = pli_gmrfest_objv(phi, pats, S, lambda)
 %PLI_GMRFEST_OBJV Gaussian MRF estimation objective
 %
 %   The objective function is defined as below
 %
-%       f(phi) := trace(A * S(X)) - log(det(A)) + lambda' * r(phi); 
+%       f(phi) := (1/2) * 
+%                 ( trace(A * S(X)) - log(det(A)) + lambda' * (phi)^2 );
 %
 %   Here, A is the concentration matrix that depends on phi, as
 %
@@ -11,15 +12,13 @@ function [objv, grad] = pli_gmrfest_objv(phi, pats, S, lambda, bw)
 %
 %   S is the sample covariance of S.
 %
-%   r(phi) is a smoothed L1 regularizer.
 %
-%
-%   objv = PLI_GMRFEST_OBJV(phi, pat, S, lambda, bw);
+%   objv = PLI_GMRFEST_OBJV(phi, pat, S, lambda);
 %
 %       Evaluates the objective function value for Gaussian MRF 
 %       estimation at the given parameter phi. 
 %
-%   [objv, grad] = PLI_GMRFEST_OBJV(phi, pat, S, lambda, bw);    
+%   [objv, grad] = PLI_GMRFEST_OBJV(phi, pat, S, lambda);    
 %
 %       Additionally evaluates and returns the gradient at phi.
 %
@@ -37,8 +36,6 @@ function [objv, grad] = pli_gmrfest_objv(phi, pats, S, lambda, bw)
 %                   sum(X(I,:) .* X(J,:), 2) * (1/n)
 %
 %   - lambda :      The regularization coefficient vector [dp x 1]
-%
-%   - bw :          The smoothing band-width.
 %
 %   Returns
 %   -------
@@ -76,19 +73,13 @@ v_det = safe_logdet(A);
 
 v_dot = V' * S;
 
-if nargout < 2
-    l1_v = pli_approxl1(phi, bw);
-else
-    [l1_v, l1_deriv] = pli_approxl1(phi, bw);
-end
-
 if isscalar(lambda)
-    v_reg = lambda * sum(l1_v);
+    v_reg = lambda * sum(phi.^2);
 else
-    v_reg = lambda' * l1_v;
+    v_reg = lambda' * (phi.^2);
 end
 
-objv = v_dot - v_det + v_reg;
+objv = 0.5 * (v_dot - v_det + v_reg);
 
 % compute gradient
 
@@ -101,9 +92,9 @@ if nargout >= 2
     
     g_det = pli_aggregx(dp, IA, pat);    
     g_dot = pli_aggregx(dp, S, IDX);
-    g_reg = lambda .* l1_deriv;
+    g_reg = lambda .* phi;
     
-    grad = g_dot - g_det + g_reg;
+    grad = 0.5 * (g_dot - g_det) + g_reg;
 end
 
 

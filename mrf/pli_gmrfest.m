@@ -1,15 +1,15 @@
-function [phi, objv] = pli_gmrfest(pat, X, lambda, bw, phi0, opts)
+function [phi, objv] = pli_gmrfest(pat, X, lambda, phi0, opts)
 %PLI_GMRFEST Gaussian MRF Estimation
 %
-%   [PHI, OBJV] = PLI_GMRFEST(pat, X, lambda, bw, phi0);
-%   [PHI, OBJV] = PLI_GMRFEST(pat, X, lambda, bw, phi0, opts);
+%   [PHI, OBJV] = PLI_GMRFEST(pat, X, lambda, phi0);
+%   [PHI, OBJV] = PLI_GMRFEST(pat, X, lambda, phi0, opts);
 %
 %       Estimates the parameters of a Gaussian MRF based on a specific
 %       pattern from given samples.
 %
 %       The objective here is to minimize the following function:
 %
-%           - sum_{i=1}^n log p(x_i | A) + lambda' * |phi|
+%           - sum_{i=1}^n log p(x_i | A) + (lambda/2)' * (phi)^2
 %
 %       Here, A is a concentration matrix defined by pli_pat2mat(pat, phi).
 %
@@ -38,10 +38,8 @@ function [phi, objv] = pli_gmrfest(pat, X, lambda, bw, phi0, opts)
 %   - X :       The sample matrix, of size [d, n]. Here, d is the
 %               sample dimension, and n is the number of samples.
 %
-%   - lambda :  The (approx) L1 regularization coefficient, which can be
+%   - lambda :  The regularization coefficient, which can be
 %               either a scalar or a vector of size [d 1].
-%
-%   - bw :      The L1-regularization smoothness band-width.
 %
 %   - phi0 :    The initial guess of the parameter vector. The input phi0
 %               should ensure A(phi0) is positive definite.
@@ -86,11 +84,7 @@ if ~(isscalar(lambda) || isequal(size(lambda), [dp 1]))
         'lambda should be either a scalar or a vector of size dp-by-1.');
 end
 
-if ~(isfloat(bw) && isscalar(bw) && isreal(bw) && bw > 0)
-    error('pli_gmrfest:invalidarg', 'bw should be a non-negative scalar.');
-end
-
-if nargin < 6
+if nargin < 5
     opts = pli_optimset('Display', 'on', 'tolfun', 1.0e-12);
 else
     if ~isstruct(opts) 
@@ -106,15 +100,15 @@ pats = {I, J, IDX, full(pat)};
 
 n = size(X, 2);
 S = sum(X(I, :) .* X(J, :), 2) * (1/n);
-lambda_ = lambda * (2/n);
+lambda_ = lambda * (1/n);
 
-fobj = @(p) pli_gmrfest_objv(p, pats, S, lambda_, bw);
+fobj = @(p) pli_gmrfest_objv(p, pats, S, lambda_);
 
 [phi, fv] = pli_fminunc(fobj, phi0, opts);
 
 if nargout >= 2
-    fv = fv + d * log(2*pi);    
-    objv = fv * (n/2);
+    fv = fv + (d/2) * log(2*pi);    
+    objv = fv * n;
 end
 
 

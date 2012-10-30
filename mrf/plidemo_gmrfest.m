@@ -13,7 +13,6 @@ w = 10;
 n = 5000;
 
 lambda = 10;
-bw = 0.01;
 
 %% generate data
 
@@ -44,10 +43,10 @@ X = pli_gauss_sample(G, n);
 phi0 = [1 0 0].';
 opts = pli_optimset('Display', 'iter', 'tolfun', 1.0e-14);
 
-[phi, objv] = pli_gmrfest(pat, X, lambda, bw, phi0, opts);
+[phi, objv] = pli_gmrfest(pat, X, lambda, phi0, opts);
 
 A = pli_pat2mat(pat, phi);
-objv2 = eval_objv(phi, A, X, lambda, bw);
+objv2 = eval_objv(phi, A, X, lambda);
 fprintf('objective = %.5g (dev = %g)\n', objv, abs(objv - objv2));
 
 disp('Results [phi_gt phi]:');
@@ -57,7 +56,7 @@ fprintf('relative error energy: %.4g\n\n', ...
 
 
 
-function v = eval_objv(phi, A, X, lambda, bw)
+function v = eval_objv(phi, A, X, lambda)
 
 d = size(A, 1);
 L = (-0.5) * (sum(X .* (A * X), 1) - pli_logdet(A) + d * log(2*pi));
@@ -65,4 +64,4 @@ L = (-0.5) * (sum(X .* (A * X), 1) - pli_logdet(A) + d * log(2*pi));
 if isscalar(lambda)
     lambda = lambda * ones(size(phi));
 end
-v = - sum(L) + lambda' * pli_approxl1(phi, bw);
+v = - sum(L) + 0.5 * (lambda' * (phi).^2);
