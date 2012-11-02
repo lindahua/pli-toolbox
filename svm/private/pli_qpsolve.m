@@ -4,6 +4,19 @@ function [x, objv] = pli_qpsolve(H, f, A, b, Aeq, beq, lb, ub, solver, opts)
 %   [x, objv] = PLI_QPSOLVE(H, f, A, b, Aeq, beq, lb, ub, solver);
 %
 
+if ~isempty(A)
+    if ~issparse(A); A = sparse(A); end
+end
+
+if ~isempty(Aeq)
+    if ~issparse(Aeq); Aeq = sparse(Aeq); end
+end
+
+if ~isempty(H)
+    if ~issparse(H); H = sparse(H); end
+end
+
+
 if ischar(solver)
     switch solver
         case 'ip'

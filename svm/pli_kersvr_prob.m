@@ -41,6 +41,10 @@ if ~(isfloat(y) && isreal(y) && isvector(y) && length(y) == n)
         'y should be a real vector of length n.');
 end
 
+if size(y, 2) > 1
+    y = y.';
+end
+
 if ~(isfloat(e) && isreal(e) && isscalar(e) && e > 0)
     error('pli_kersvr_prob:invalidarg', 'e should be a positive scalar.');
 end
@@ -52,7 +56,11 @@ if ~isa(K, 'double'); K = double(K); end
 if ~isa(y, 'double'); y = double(y); end
 
 H = [K -K; -K K];
-f = [(e - y) .* ones(n, 1); (e + y) .* ones(n, 1)];
+
+didx = 1 + (0:2*n-1) * (2*n+1);
+H(didx) = H(didx) + 1.0e-8;
+
+f = [e - y; e + y];
 Aeq = [ones(1, n), -ones(1, n)];
 beq = 0;
 
