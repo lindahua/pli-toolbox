@@ -1,8 +1,8 @@
-function [phi, objv] = pli_gmrfest(pat, X, lambda, phi0, opts)
+function [phi, objv] = pli_gmrfest(pat, X, sw, lambda, phi0, opts)
 %PLI_GMRFEST Gaussian MRF Estimation
 %
-%   [PHI, OBJV] = PLI_GMRFEST(pat, X, lambda, phi0);
-%   [PHI, OBJV] = PLI_GMRFEST(pat, X, lambda, phi0, opts);
+%   [PHI, OBJV] = PLI_GMRFEST(pat, X, sw, lambda, phi0);
+%   [PHI, OBJV] = PLI_GMRFEST(pat, X, sw, lambda, phi0, opts);
 %
 %       Estimates the parameters of a Gaussian MRF based on a specific
 %       pattern from given samples.
@@ -38,6 +38,9 @@ function [phi, objv] = pli_gmrfest(pat, X, lambda, phi0, opts)
 %   - X :       The sample matrix, of size [d, n]. Here, d is the
 %               sample dimension, and n is the number of samples.
 %
+%   - sw :      The sample weights. If all samples have the same weight,
+%               sw can be set to []. Otherwise, it can be a 1 x n vector.
+%
 %   - lambda :  The regularization coefficient, which can be
 %               either a scalar or a vector of size [d 1].
 %
@@ -67,6 +70,18 @@ if ~(isfloat(X) && ismatrix(X) && isreal(X) && size(X,1) == d)
     error('pli_gmrfest:invalidarg', ...
         'X should be a real matrix with size(X,1) = d.');
 end
+n = size(X, 2);
+
+if ~isempty(sw)
+    if ~(isfloat(sw) && isreal(sw) && isvector(sw) && length(sw) == n)
+        error('pli_gmrfest:invalidarg', ...
+            'sw should be either empty or a real vector of length n.');    
+    end
+    if size(sw, 2) > 1  
+        sw = sw.';
+    end
+end
+
 
 if ~(isfloat(lambda) && isvector(lambda) && isreal(lambda))
     error('pli_gmrfest:invalidarg', ...
@@ -98,9 +113,16 @@ end
 [I, J, IDX] = find(pat);
 pats = {I, J, IDX, full(pat)};
 
-n = size(X, 2);
-S = sum(X(I, :) .* X(J, :), 2) * (1/n);
-lambda_ = lambda * (1/n);
+if isempty(sw)
+    tw = n;
+    S = sum(X(I, :) .* X(J, :), 2) * (1/tw);
+else
+    tw = sum(sw);
+    S = (X(I,:) .* X(J,:)) * sw;
+    S = S * (1/tw);
+end
+    
+lambda_ = lambda * (1/tw);
 
 fobj = @(p) pli_gmrfest_objv(p, pats, S, lambda_);
 
@@ -108,7 +130,7 @@ fobj = @(p) pli_gmrfest_objv(p, pats, S, lambda_);
 
 if nargout >= 2
     fv = fv + (d/2) * log(2*pi);    
-    objv = fv * n;
+    objv = fv * tw;
 end
 
 
