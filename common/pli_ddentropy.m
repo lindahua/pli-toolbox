@@ -1,5 +1,5 @@
 function v = pli_ddentropy(P, dim)
-%DDENTROPY Entropy of discrete distribution
+%PLI_DDENTROPY Entropy of discrete distribution
 %
 %   v = PLI_DDENTROPY(P);
 %   v = PLI_DDENTROPY(P, dim);
