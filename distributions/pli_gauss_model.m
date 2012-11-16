@@ -3,7 +3,7 @@ classdef pli_gauss_model < pli_pmodel_base
     
     properties
         cform;
-        dim;
+        dim;        
     end
     
     methods
@@ -18,10 +18,8 @@ classdef pli_gauss_model < pli_pmodel_base
             end
             
             cform_ok = 0;
-            if ischar(cf) && ...
-                    (isscalar(cf) || strcmp(cf(2:end), '-tied'))
-                
-                if cf(1) == 's' || cf(1) == 'd' || cf(1) == 'f'
+            if ischar(cf) && isscalar(cf)                
+                if cf == 's' || cf == 'd' || cf == 'f'
                     cform_ok = 1;
                 end                
             end
