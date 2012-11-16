@@ -28,11 +28,6 @@ function D = pli_gauss_mahdist(G, X, op)
 
 %% argument checking
 
-if ~(isstruct(G) && strcmp(G.tag, 'gauss'))
-    error('pli_gauss_mahdist:invalidarg', ...
-        'G must be a Gaussian struct.');
-end
-
 d = G.dim;
 
 if ~(isfloat(X) && isreal(X) && ismatrix(X) && size(X,1) == d)
@@ -52,11 +47,11 @@ end
 
 %% main
 
-f = G.cform;
+cf = G.cform;
 m = G.num;
 
 mu = G.mu;
-cov = G.cov;
+cvals = G.cvals;
 
 if m == 1
     if isequal(mu, 0)
@@ -65,30 +60,30 @@ if m == 1
         Z = bsxfun(@minus, X, mu);
     end
     
-    if f == 0
-        D = sum(Z.^2, 1) * (1 ./ cov);
-    elseif f == 1
-        D = sum(bsxfun(@times, Z.^2, 1 ./ cov), 1);
+    if cf == 's'
+        D = sum(Z.^2, 1) * (1 ./ cvals);
+    elseif cf == 'd'
+        D = sum(bsxfun(@times, Z.^2, 1 ./ cvals), 1);
     else
-        D = sum(Z .* (cov \ Z), 1);
+        D = sum(Z .* (cvals \ Z), 1);
     end    
     
 else            
-   if f == 0
+   if cf == 's'
        sxx = sum(X.^2, 1);
        suu = sum(mu.^2, 1);
        D = bsxfun(@plus, suu', sxx) - (2 * mu)' * X;
-       if isscalar(cov)
-           if cov ~= 1
-               D = D * (1.0 / cov);
+       if isscalar(cvals)
+           if cvals ~= 1
+               D = D * (1.0 / cvals);
            end
        else
-           D = bsxfun(@times, D, 1 ./ cov);
+           D = bsxfun(@times, D, 1 ./ cvals);
        end
        
    else
-       if f == 1
-           q = 1 ./ cov;
+       if cf == 'd'
+           q = 1 ./ cvals;
            if size(q, 2) == 1
                H = bsxfun(@times, q, mu);               
            else
@@ -97,14 +92,14 @@ else
            sxx = q' * (X.^2); 
        
        else
-           if ismatrix(cov)
-               H = cov \ mu;
-               sxx = sum(X .* (cov \ X), 1);
+           if ismatrix(cvals)
+               H = cvals \ mu;
+               sxx = sum(X .* (cvals \ X), 1);
            else                                  
                sxx = zeros(size(X, 2), m);
                H = zeros(d, m);
                for k = 1 : m
-                   Ck = cov(:,:,k);
+                   Ck = cvals(:,:,k);
                    H(:,k) = Ck \ mu(:,k);
                    sxx(:, k) = sum(X .* (Ck \ X), 1);
                end

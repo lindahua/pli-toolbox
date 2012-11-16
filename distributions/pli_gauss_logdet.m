@@ -18,24 +18,24 @@ function v = pli_gauss_logdet(G)
 
 %% main
 
-cov = G.cov;
+cvals = G.cvals;
 
 switch G.cform
-    case 0
-        v = log(cov) * G.dim;
-    case 1
-        v = sum(log(cov), 1);
-        if size(cov, 2) > 1
+    case 's'
+        v = log(cvals) * G.dim;
+    case 'd'
+        v = sum(log(cvals), 1);
+        if size(cvals, 2) > 1
             v = v.';
         end
-    case 2
-        if ismatrix(cov)
-            v = pli_logdet(cov);
+    case 'f'
+        if ismatrix(cvals)
+            v = pli_logdet(cvals);
         else
             m = G.num;
             v = zeros(m, 1);
             for k = 1 : m
-                v(k) = pli_logdet(cov(:,:,k));
+                v(k) = pli_logdet(cvals(:,:,k));
             end
         end
 end

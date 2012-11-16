@@ -58,7 +58,7 @@ y0 = r * sin(t);
 m = G.num;
 
 if m == 1
-    [xt, yt] = transform_single(G.mu, G.cov, G.cform, x0, y0);
+    [xt, yt] = transform_single(G.mu, G.cvals, G.cform, x0, y0);
     plot(xt, yt, varargin{:});
 else
     cf = G.cform;
@@ -77,15 +77,15 @@ end
 function [xt, yt] = transform_single(mu, cov, cf, x, y)
 
 switch cf
-    case 0
+    case 's'
         s = sqrt(cov);
         xt = s * x;
         yt = s * y;
-    case 1
+    case 'd'
         s = sqrt(cov);
         xt = s(1) * x;
         yt = s(2) * y;
-    case 2
+    case 'f'
         % 2D Cholesky decompostion
         c11 = cov(1, 1);
         c12 = cov(1, 2);
@@ -118,26 +118,26 @@ else
     mu = G.mu(:, i);
 end
 
-G_cov = G.cov;
+G_cvals = G.cvals;
 
 switch G.cform
-    case 0
-        if isscalar(G_cov)
-            cov = G_cov;
+    case 's'
+        if isscalar(G_cvals)
+            cov = G_cvals;
         else
-            cov = G_cov(i);
+            cov = G_cvals(i);
         end
-    case 1
-        if size(G_cov, 2) == 1
-            cov = G_cov;
+    case 'd'
+        if size(G_cvals, 2) == 1
+            cov = G_cvals;
         else
-            cov = G_cov(:, i);
+            cov = G_cvals(:, i);
         end
-    case 2
-        if ismatrix(G_cov)
-            cov = G_cov;
+    case 'f'
+        if ismatrix(G_cvals)
+            cov = G_cvals;
         else
-            cov = G_cov(:,:,i);
+            cov = G_cvals(:,:,i);
         end
 end
 

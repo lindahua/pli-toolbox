@@ -11,30 +11,24 @@ function X = pli_gauss_sample(G, n)
 %   - n :   The number of samples to draw
 %
 
-%% argument checking
-
-if ~(isstruct(G) && strcmp(G.tag, 'gauss') && G.num == 1)
-    error('pli_gauss_sample:invalidarg', ...
-        'G should be a Gaussian struct with G.num == 1.');
-end
 
 %% main
 
 Z = randn(G.dim, n);
 
-cov = G.cov;
+cvals = G.cvals;
 
 switch G.cform
-    case 0
-        X = sqrt(cov) * Z;
-    case 1
+    case 's'
+        X = sqrt(cvals) * Z;
+    case 'd'
         if n == 1
-            X = sqrt(cov) * Z;
+            X = sqrt(cvals) * Z;
         else
-            X = bsxfun(@times, sqrt(cov), Z);
+            X = bsxfun(@times, sqrt(cvals), Z);
         end
-    case 2
-        X = chol(cov, 'lower') * Z;            
+    case 'f'
+        X = chol(cvals, 'lower') * Z;            
 end
 
 mu = G.mu;

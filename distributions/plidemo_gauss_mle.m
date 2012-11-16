@@ -27,9 +27,9 @@ Gf = pli_gauss_mle(X, [], 'f');
 %% Display results
 
 display_result('True model', mu0, C0);
-display_result('Gs', Gs.mu, Gs.cov);
-display_result('Gd', Gd.mu, Gd.cov);
-display_result('Gf', Gf.mu, Gf.cov);
+display_result('Gs', Gs.mu, Gs.cvals);
+display_result('Gd', Gd.mu, Gd.cvals);
+display_result('Gf', Gf.mu, Gf.cvals);
 
 
 %% Visualize results

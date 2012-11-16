@@ -29,7 +29,7 @@ classdef test_gauss_sample < mtest_case
                     C = cov;
             end
             
-            obj.gauss = pli_makegauss(d, mu, cov);
+            obj.gauss = pli_makegauss(d, mu, cf, cov);
             assert(obj.gauss.num == 1);
             
             obj.cov_mat = C;

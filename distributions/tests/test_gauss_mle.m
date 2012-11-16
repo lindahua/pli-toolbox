@@ -42,7 +42,7 @@ classdef test_gauss_mle < mtest_case
                 assert(G.num == G0.num);
                 assert(G.cform == G0.cform);
                 assert(mtest_is_approx(G.mu, G0.mu));
-                assert(mtest_is_approx(G.cov, G0.cov));
+                assert(mtest_is_approx(G.cvals, G0.cvals));
             end
             
             w = rand(n, m);
@@ -54,7 +54,7 @@ classdef test_gauss_mle < mtest_case
             assert(G.cform == G0.cform);
             assert(mtest_is_approx(G.mu, G0.mu));
             
-            assert(mtest_is_approx(G.cov, G0.cov));                                    
+            assert(mtest_is_approx(G.cvals, G0.cvals));                                    
         end
         
         
@@ -66,40 +66,27 @@ classdef test_gauss_mle < mtest_case
             
             n = 100;
             X = bsxfun(@times, randn(d, d) * randn(d, n), randn(d, 1));
-            
-            cf_t = [cf '-tied'];
-            
+                        
             w = rand(n, m);
-            G0 = test_gauss_mle.safe_mle(X, w, cf_t);
-            G = pli_gauss_mle(X, w, cf_t);
+            G0 = test_gauss_mle.safe_mle(X, w, cf, true);
+            G = pli_gauss_mle(X, w, cf, 'tie-cov');
             
             assert(G.dim == G0.dim);
             assert(G.num == G0.num);
             assert(G.cform == G0.cform);
             assert(mtest_is_approx(G.mu, G0.mu));
             
-            assert(mtest_is_approx(G.cov, G0.cov)); 
+            assert(mtest_is_approx(G.cvals, G0.cvals)); 
         end
                 
     end
     
     
     methods(Static)
-        function G = safe_mle(X, w, cform)
+        function G = safe_mle(X, w, cf, tie)
             
-            if isscalar(cform)
-                tie = 0;
-            elseif length(cform) == 6
-                tie = 1;
-            end
-            
-            switch cform(1)
-                case 's'
-                    cf = 0;
-                case 'd'
-                    cf = 1;
-                case 'f'
-                    cf = 2;
+            if nargin < 4
+                tie = false;
             end
             
             d = size(X, 1);
@@ -140,18 +127,18 @@ classdef test_gauss_mle < mtest_case
                 C = (Z * bsxfun(@times, w(:), Z')) / sum(sw);
             end
             
-            if cf == 0
-                cov = zeros(mc, 1);
+            if cf == 's'
+                cvals = zeros(mc, 1);
                 for k = 1 : mc
-                    cov(k) = mean(diag(C(:,:,k)));
+                    cvals(k) = mean(diag(C(:,:,k)));
                 end
-            elseif cf == 1
-                cov = zeros(d, mc);
+            elseif cf == 'd'
+                cvals = zeros(d, mc);
                 for k = 1 : mc
-                    cov(:,k) = diag(C(:,:,k));
+                    cvals(:,k) = diag(C(:,:,k));
                 end
-            else
-                cov = C;
+            elseif cf == 'f'
+                cvals = C;
             end
             
             % make struct
@@ -160,7 +147,7 @@ classdef test_gauss_mle < mtest_case
             G.num = m;
             G.cform = cf;
             G.mu = mu;
-            G.cov = cov;                        
+            G.cvals = cvals;                        
         end
         
     end

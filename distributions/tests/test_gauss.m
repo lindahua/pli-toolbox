@@ -46,8 +46,6 @@ classdef test_gauss < mtest_case
                         Cmat(:,:,k) = diag(ones(d,1) * cov(k));
                     end
                     
-                    obj.cform = 0;
-                    
                 case 'd'
                     cov = 1.0 + rand(d, mc);
                     
@@ -55,8 +53,6 @@ classdef test_gauss < mtest_case
                     for k = 1 : mc
                         Cmat(:,:,k) = diag(cov(:,k));
                     end          
-                    
-                    obj.cform = 1;
                     
                 case 'f'
                     cov = zeros(d, d, mc);                    
@@ -67,16 +63,11 @@ classdef test_gauss < mtest_case
                     end
                     
                     Cmat = cov;
-                    
-                    obj.cform = 2;
             end
             
-            if tiecov
-                obj.gauss = pli_makegauss(d, mu, cov, 'tie_cov');
-            else
-                obj.gauss = pli_makegauss(d, mu, cov);
-            end
+            obj.cform = cf;
             
+            obj.gauss = pli_makegauss(d, mu, cf, cov);            
             obj.cov_mat = Cmat;
             
         end
@@ -84,11 +75,9 @@ classdef test_gauss < mtest_case
         
         function s = name(self)
             
-            cf_syms = ['s', 'd', 'f'];
-            cf_sym = cf_syms(self.cform + 1);                
-            
+                          
             s = sprintf('%s [f=%c, d=%d, m=%d, zm=%d, tc=%d]', ...
-                class(self), cf_sym, self.dim, self.num, ...
+                class(self), self.cform, self.dim, self.num, ...
                 self.zero_mean, self.tie_cov);
             
         end        

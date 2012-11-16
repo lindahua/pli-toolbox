@@ -1,62 +1,57 @@
-function G = pli_makegauss(d, mu, cov, op)
+function G = pli_makegauss(d, mu, cform, cvals)
 %PLI_MAKEGAUSS Construct a Gaussian struct
 %
-%   G = PLI_MAKEGAUSS(d, mu, cov);
+%   G = PLI_MAKEGAUSS(d, mu, cform, vals);
+%       
+%       Constructs a struct representing a Gaussian distribution or 
+%       a set of Gaussian distribution(s) over a d-dimensional space.
 %
-%       Constructs a struct representing a Gaussian distribution or
-%       a collection of multiple Gaussian distribution(s) over a
-%       d-dimensional space.
+%       Mean vectors
+%       -------------
+%       The mean vector mu can be input as a full vector or just a zero
+%       scalar to indicate zero mean.
 %
-%   G = PLI_MAKEGAUSS(d, mu, cov, 'tie_cov');
+%       When multiple distributions are to be packed, mu must be a
+%       d-by-m matrix, each column corresponding to one distribution. 
 %
-%       Constucts a Gaussian struct with tied covariance,
-%       i.e. a covariance matrix is shared across all distributions.
 %
-%   Arguments
-%   ---------
-%   - d :   The space dimension.
+%       Covariance
+%       -----------
+%       Here, cform, an indicator of the form that the covariance values 
+%       are stored, can take either of the following values:
 %
-%   - mu :  The mean vector(s). mu can be either 0 (zero scalar) or
-%           a matrix of size [d, m]. Here, m is the number of 
-%           distributions. 
+%       - 's':  scalar form, use a scalar s to represent a covariance 
+%               matrix in the form of s * eye(d).
 %
-%   - cov : The covariance matrix (or matrices). When cov is a diagonal
-%           matrix, a compact representation can be used. 
-%           
-%           When there is a single distribution or the covariance is
-%           tied, cov can be in either of the following forms:
+%               cvals is either a scalar or a column vector of length m.
 %
-%           - a scalar : 
-%               representing eye(cov) * d
+%       - 'd':  diagonal form, use a vector v to represent a diagonal
+%               matrix in the form of diag(v).
 %
-%           - a column vector of size [d, 1] : 
-%               representing diag(cov)
+%               cvals should be either a column vector, or a matrix of 
+%               size d-by-m.
 %
-%           - a full covariance matrix of size [d, d]:
+%       - 'f':  full form, use a d x d covariance matrix.
+%       
+%               cvals should be either a d-by-d matrix, or an array of
+%               size d-by-d-by-m.
 %
-%           When cov is not tied, it can be in the following forms:
-%
-%           - a row vector of size [m, 1]:
-%               representing multiple matrices as eye(cov(i)) * d
-%
-%           - a matrix of size [d, m]:
-%               representing multiple matrices as diag(cov(:,i))
-%
-%           - a cube of size [d, d, m]
-%               representing multiple covariance matrices as cov(:,:,i).
+%       Note that it allows packing multiple distribution with different
+%       mean vectors and a shared covariance.
 %
 %   Returns
 %   -------
 %   - G :   The constructed Gaussian struct, which contains the following
 %           fields:
+%           - tag :     a tag string 'gauss'
 %           - num :     The number of encapsulated distributions
 %           - dim :     The dimension
-%           - cform :   An integer that indicates the covariance form
-%                       - 0 : scalar form
-%                       - 1 : diagonal form
-%                       - 2 : full matrix form
+%           - cform :   A char that indicates the covariance form
+%                       - 's' : scalar form
+%                       - 'd' : diagonal form
+%                       - 'f' : full matrix form
 %           - mu :      The mean vector(s)
-%           - cov :     The covariance(s)
+%           - cvals :   The values to represent covariance(s)
 %
 
 %% argument checking
@@ -78,56 +73,43 @@ else
     m = size(mu, 2);
 end
 
-% for argument: op
+% for argument: cform
 
-if nargin < 4
-    tie_c = 0;
-else
-    if ~strcmp(op, 'tie_cov')
-        error('pli_makegauss:invalidarg', ...
-            'Failed to recognize the 4th argument.');
+if ~(ischar(cform) && isscalar(cform))
+    error('pli_makegauss:invalidarg', 'cform should be a character.');
+end
+
+% for argument: cvals
+
+if ~(isfloat(cvals) && isreal(cvals))
+    error('pli_makegauss:invalidarg', 'cov should be a real matrix.');
+end
+
+if cform == 's'
+    if ~(isscalar(cvals) || (isvector(cvals) && length(cvals) == m))
+        error('pli_makegauss:invalidarg', 'Invalid size of cvals.');
     end
-    tie_c = 1;
-end
-
-% for argument: cov
-
-if ~(isfloat(cov) && isreal(cov))
-    error('pli_makegauss:invalidarg', ...
-        'cov should be a real matrix.');
-end
-
-cform = -1;
-
-if m == 1 || tie_c
+    if size(cvals, 2) > 1
+        cvals = cvals.';
+    end
     
-    if isscalar(cov)
-        cform = 0;
-    elseif ismatrix(cov)
-        cov_siz = size(cov);
-        if isequal(cov_siz, [d 1])
-            cform = 1;
-        elseif isequal(cov_siz, [d d])
-            cform = 2;
-        end
+elseif cform == 'd'
+    m2 = size(cvals,2);
+    if ~(ismatrix(cvals) && size(cvals,1) == d && (m2 == 1 || m2 == m))
+        error('pli_makegauss:invalidarg', 'Invalid size of cvals.');
+    end
+           
+elseif cform == 'f'
+    m2 = size(cvals,3);
+    if ~(size(cvals,1) == d && size(cvals,2) == d && (m2 == 1 || m2 == m))
+        error('pli_makegauss:invalidarg', 'Invalid size of cvals.');
     end
     
 else
-    
-    cov_siz = size(cov);
-    if isequal(cov_siz, [m, 1])
-        cform = 0;
-    elseif isequal(cov_siz, [d, m])
-        cform = 1;
-    elseif isequal(cov_siz, [d, d, m])
-        cform = 2;
-    end
-    
+    error('pli_makegauss:invalidarg', 'Invalid value of cform.');
 end
 
-if cform < 0
-    error('pli_makegauss:invalidarg', 'The size of cov is invalid.');
-end
+
         
 %% make struct
 
@@ -137,6 +119,6 @@ G = struct( ...
     'dim', double(d), ...
     'cform', cform, ...
     'mu', mu, ...
-    'cov', cov);
+    'cvals', cvals);
 
 

@@ -1,4 +1,4 @@
-function G = pli_gauss_mle(X, w, cform)
+function G = pli_gauss_mle(X, w, cf, op)
 %PLI_GAUSS_MLE Maximum likelihood estimation of Gaussian distribution(s)
 %
 %   G = PLI_GAUSS_MLE(X);
@@ -14,6 +14,12 @@ function G = pli_gauss_mle(X, w, cform)
 %   G = PLI_GAUSS_MLE(X, w, cform);
 %
 %       Maximum likelihood estimation using specified form of covariance.
+%
+%   G = PLI_GAUSS_MLE(X, [], cform, 'tie-cov');
+%   G = PLI_GAUSS_MLE(X, w, cform, 'tie-cov');
+%       
+%       Ties the covariance of different Gaussian components. 
+%
 %
 %   Arguments
 %   ---------
@@ -32,10 +38,6 @@ function G = pli_gauss_mle(X, w, cform)
 %               - 's':  scalar form
 %               - 'd':  diagonal form
 %               - 'f':  full form
-%               - 's-tied': tied covariance in scalar form
-%               - 'd-tied': tied covariance in diagonal form
-%               - 'f-tied': tied covariance in full form
-%
 %               When cform is omitted, it takes the default value 'f'.
 %
 
@@ -70,11 +72,21 @@ else
     inv_sw = 1 ./ sw;
 end
 
-if nargin < 3    
-    cf = 2;
+if nargin < 3
+    cf = 'f';
+else
+    if ~(ischar(cf) && isscalar(cf))
+        error('pli_gauss_mle:invalidarg', 'cform should be a character.');
+    end
+end
+
+if nargin < 4
     tied = 0;
 else
-    [cf, tied] = parse_cform(cform);
+    if ~strcmpi(op, 'tie-cov')
+        error('pli_gauss_mle:invalidarg', 'The 4th argument is invalid.');
+    end
+    tied = 1;
 end
 
 tie_multi = m > 1 && tied;
@@ -95,43 +107,46 @@ end
 % estimate covariance
 
 switch cf
-    case 0
+    case 's'
         inv_d = 1 / d;
         mx2 = sum(X.^2, 1) * inv_d;
         Exx = (mx2 * w) .* inv_sw;            
         Euu = sum(mu.^2, 1) * inv_d;
-        cov = (Exx - Euu).';
+        cvals = (Exx - Euu).';
         
         if tie_multi
-            cov = sw * cov;
+            cvals = sw * cvals;
         end
         
-    case 1
+    case 'd'
         Exx = bsxfun(@times, (X.^2) * w, inv_sw);
-        cov = Exx - mu .^ 2;
+        cvals = Exx - mu .^ 2;
         
         if tie_multi
-            cov = cov * sw';
+            cvals = cvals * sw';
         end
         
-    case 2
+    case 'f'
         if tie_multi
-            cov = zeros(d, d);
+            cvals = zeros(d, d);
             for k = 1 : m
                 Ck = est_full_cov(X, mu(:,k), w(:,k), inv_sw(k));
-                cov = cov + Ck * sw(k);
+                cvals = cvals + Ck * sw(k);
             end
         else
             if m == 1
-                cov = est_full_cov(X, mu, w, inv_sw);
+                cvals = est_full_cov(X, mu, w, inv_sw);
             else
-                cov = zeros(d, d, m);
+                cvals = zeros(d, d, m);
                 for k = 1 : m
                     mu_k = mu(:, k);
-                    cov(:,:,k) = est_full_cov(X, mu_k, w(:,k), inv_sw(k));
+                    cvals(:,:,k) = est_full_cov(X, mu_k, w(:,k), inv_sw(k));
                 end
             end
         end
+        
+    otherwise
+        error('pli_gauss_mle:invalidarg','Invalid value of cform.');
 end
 
 % make Gaussian struct
@@ -142,7 +157,7 @@ G = struct( ...
     'dim', d, ...
     'cform', cf, ...
     'mu', mu, ...
-    'cov', cov);
+    'cvals', cvals);
 
 
 %% Auxiliary functions
@@ -152,31 +167,4 @@ function C = est_full_cov(X, mu, w, inv_sw)
 Exx = (X * bsxfun(@times, w, X')) * inv_sw;
 C = Exx - mu * mu';
 
-
-function [cf, tied] = parse_cform(cform)
-
-len = length(cform);
-
-if len == 1
-    tied = 0;
-elseif len == 6 && strcmp(cform(3:6), 'tied')
-    tied = 1;
-else
-    error('pli_gauss_mle:invalidarg', 'Invalid value for cform.');
-end
-
-switch cform(1)
-    case 's'
-        cf = 0;
-    case 'd'
-        cf = 1;
-    case 'f'
-        cf = 2;
-    otherwise
-        error('pli_gauss_mle:invalidarg', 'Invalid value for cform.');
-end
-
-
-
-    
 
