@@ -8,7 +8,7 @@ function plidemo_lda_vem()
 
 V = 8;
 K = 3;
-doc_len = 200;
+doc_len = 1000;
 ndocs = 100;
 ndocs_show = 5;
 
@@ -19,11 +19,12 @@ disp('========================');
 
 % topics
 
-U = exp(8 * rand(V, K));
-U = bsxfun(@times, U, 1 ./ sum(U, 1));
+U = exp(8 * rand(K, V));
+U = bsxfun(@times, U, 1 ./ sum(U, 2));
+logU = log(U);
 
 for k = 1 : K
-    print_vec(sprintf('Topic [%d]', k), '%.4f ', U(:,k));
+    print_vec(sprintf('Topic [%d]', k), '%.4f ', U(k,:));
 end
 
 disp(' ');
@@ -46,7 +47,7 @@ H = zeros(V, ndocs);
 for i = 1 : ndocs
     
     theta = Theta(:, i);
-    p = U * theta;    
+    p = theta' * U;
     h = mnrnd(doc_len, p);
     
     H(:,i) = h;
@@ -67,20 +68,18 @@ disp('  pmean: posterior mean');
 disp('  theta: underlying p');
 disp('========================');
 
-vi_problem = pli_lda_vinfer_problem(alpha, U);
-
 for i = 1 : ndocs_show
     
-    h = H(:, i);
-    sol = vi_problem.init_solution(h);
+    h = H(:, i);    
+    gam = pli_lda_vinfer(alpha, logU, h, 'display', 'off');
     
-    sol = pli_iteroptim('maximize', @vi_problem.eval_objv, ...
-        @vi_problem.update, sol, ...
-        'display', 'off');
-        
-    print_vec(sprintf('Doc [%d].gamma', i), '%8.4f ', sol.gamma); 
-    print_vec('        pmean', '%8.4f ', sol.gamma / sum(sol.gamma));
-    print_vec('        theta', '%8.4f ', Theta(:,i));
+    theta = Theta(:,i);
+    p = gam / sum(gam);
+    
+    print_vec(sprintf('Doc [%d].gamma', i), '%8.4f ', gam); 
+    print_vec('        pmean', '%8.4f ', p);
+    print_vec('        theta', '%8.4f ', theta);
+      fprintf('        L1-dev = %.4f\n', norm(theta - p, 1));
     fprintf('\n');
 end
 
@@ -93,25 +92,24 @@ if ~strcmpi(answer, 'y')
     return;
 end
 
-
 disp('Model Estimation (VEM)');
 disp('========================');
-
-vem_problem = pli_lda_vem_problem(V, 0.01);
-vem_problem.set_docs(H);
 
 U_init = U + 0.1 * rand(size(U));
 U_init = bsxfun(@times, U_init, 1 ./ sum(U, 1));
 
-sol = vem_problem.init_solution(U_init);
-
-sol = pli_iteroptim('maximize', @vem_problem.eval_objv, ...
-    @vem_problem.update, sol, ...
-    'maxiter', 100, ...
-    'display', 'iter');
+sol = pli_lda_vem(H, U_init, 'pricnt', 1, 'display', 'iter', 'maxiter', 100);
 
 print_vec('est  alpha', '%7.4f ', sol.alpha);
 print_vec('true alpha', '%7.4f ', alpha);
+
+fprintf('\nEstimated topics:\n');
+for k = 1 : K
+    print_vec(sprintf('Topic [%d] gtr', k), '%.4f ', sol.U(k,:));
+    print_vec('          est', '%.4f ', U(k,:));
+end
+
+disp(' ');
 
 
 function print_vec(title, spec, v)

@@ -36,10 +36,6 @@ function [sol, objv, t, converged] = pli_gmm_em(X, K, varargin)
 %   - tolfun :      The tolerance of change in the objective function
 %                   value at convergence. (default = 1.0e-8)
 %
-%   - lasting :     The required number of iterations where the objective
-%                   change is below tolfun before the procedure converges.
-%                   (default = 5)
-%
 %   - display :     The level of information display: 
 %                   'off' | 'final' | {'iter'}.
 %
@@ -101,6 +97,5 @@ sol = problem.init_solution(K);
     @problem.eval_objv, @problem.update, sol, ...
     'maxiter', S.maxiter, ...
     'tolfun', S.tolfun, ...
-    'lasting', S.lasting, ...
     'display', S.display);
 

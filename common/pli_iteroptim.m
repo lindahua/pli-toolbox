@@ -34,10 +34,7 @@ function [sol, objv, t, converged] = pli_iteroptim(op, objfun, updatefun, sol, v
 %   - tolfun :      The tolerance of objective function changes at
 %                   convergence. (default = 1.0e-8)
 %
-%   - lasting :     The procedure is considered converged when the 
-%                   changes of the objective function is below tolfun
-%                   for consecutive "lasting" iterations.
-%                   (default = 5)
+%   - nupdates :    The number of updates at each iteration. (default = 1).
 %   
 %   - display :     'off' | 'final' | {'iter'}.
 %
@@ -63,13 +60,12 @@ if ~isa(updatefun, 'function_handle')
         'updatefun must be a function handle.');
 end
 
-[maxiter, tolfun, lasting, displevel] = get_opts(varargin);
+[maxiter, tolfun, nupdates, displevel] = get_opts(varargin);
 
 %% main
 
 t = 0;
 converged = false;
-last_t = 0;
 
 objv = nan;
 
@@ -88,7 +84,13 @@ while ~converged && t < maxiter
     
     % update solution
     
-    sol = updatefun(sol);
+    if nupdates == 1
+        sol = updatefun(sol);
+    else
+        for j = 1 : nupdates
+            sol = updatefun(sol);
+        end
+    end
     
     % re-evaluate objective function
     
@@ -100,12 +102,7 @@ while ~converged && t < maxiter
         % determine convergence
         
         if abs(ch) < tolfun
-            last_t = last_t + 1;
-            if last_t == lasting
-                converged = true;
-            end
-        else
-            last_t = 0;
+            converged = true;
         end
     end
     
@@ -140,10 +137,10 @@ end
 
 %% auxiliary functions
 
-function [maxiter, tolfun, lasting, displevel] = get_opts(oplist)
+function [maxiter, tolfun, nupdates, displevel] = get_opts(oplist)
 
 S = struct( ...
-    'maxiter', 200, 'tolfun', 1.0e-8, 'lasting', 5, ...
+    'maxiter', 200, 'tolfun', 1.0e-8, 'nupdates', 1, ...
     'display', 'iter');
 
 if ~isempty(oplist)
@@ -152,7 +149,7 @@ end
 
 maxiter = S.maxiter;
 tolfun = S.tolfun;
-lasting = S.lasting;
+nupdates = S.nupdates;
 
 switch S.display
     case 'off'
