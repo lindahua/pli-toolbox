@@ -3,7 +3,8 @@ classdef pli_gauss_model < pli_pmodel_base
     
     properties
         cform;
-        dim;        
+        dim;  
+        tie_cov; 
     end
     
     methods
@@ -21,7 +22,14 @@ classdef pli_gauss_model < pli_pmodel_base
             if ischar(cf) && isscalar(cf)                
                 if cf == 's' || cf == 'd' || cf == 'f'
                     cform_ok = 1;
+                    tiec = false;
                 end                
+            elseif strcmp(cf(2:end), '-tied')
+                cf = cf(1);
+                if cf == 's' || cf == 'd' || cf == 'f'
+                    cform_ok = 1;
+                    tiec = true;
+                end
             end
             
             if ~cform_ok
@@ -33,6 +41,7 @@ classdef pli_gauss_model < pli_pmodel_base
             
             obj.cform = cf;
             obj.dim = d;
+            obj.tie_cov = tiec;
         end
         
     end    
@@ -56,9 +65,17 @@ classdef pli_gauss_model < pli_pmodel_base
         end
         
         
-        function G = estimate_param(self, X, weights, ~)
+        function G = update_params(self, X, weights, sidx, ~)
             
-            G = pli_gauss_mle(X, weights, self.cform);
+            if ~isempty(sidx)
+                X = X(:, sidx);
+            end            
+            
+            if self.tie_cov
+                G = pli_gauss_mle(X, weights, self.cform, 'tie-cov');
+            else
+                G = pli_gauss_mle(X, weights, self.cform);
+            end
         end
         
         function L = evaluate_loglik(~, G, X)

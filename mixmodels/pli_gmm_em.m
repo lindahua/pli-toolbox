@@ -22,7 +22,7 @@ function [sol, objv, t, converged] = pli_gmm_em(X, K, varargin)
 %
 %   Options
 %   -------
-%   - covform :     The form of covariance:
+%   - covform :     The form of covariance: 
 %                   's' | 'd' | {'f'} | 's-tied' | 'd-tied' | 'f-tied'
 %
 %   - weights :     The sample weights, which should be an n x 1 vector.
@@ -84,8 +84,10 @@ end
 % problem construction
 
 d = size(X, 1);
-model = pli_gauss_model(d, S.covform);
+model = pli_gauss_model(d, S.covform); 
+
 problem = pli_fmm_em_problem(model, S.pricount);
+
 
 problem.set_obs(X, S.weights);
 

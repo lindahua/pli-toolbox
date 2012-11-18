@@ -1,10 +1,20 @@
-function plidemo_gmm_em()
+function plidemo_gmm_em(cform)
 %PLIDEMO_GMM_EM Demonstartes GMM estimation using EM
 %
 %   PLIDEMO_GMM_EM();
+%   PLIDEMO_GMM_EM(cform);
+%
+%       Here, cform is the form of covariance, which can be either of
+%       the following values: 's'|'d'|'f'|'s-tied'|'d-tied'|'f-tied'.
+%
+%       Default value of cform is 'f';
 %
 
 %% Experiment configuration
+
+if nargin == 0
+    cform = 'f';
+end
 
 d = 2;
 K = 3;
@@ -13,7 +23,6 @@ n = 1000;   % # samples / cluster
 inter_sig = 6;
 intra_sig = 1;
 
-cform = 'f';
 
 %% Generate data
 
