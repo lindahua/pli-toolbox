@@ -1,8 +1,8 @@
-function Y = pli_nrmexp(X, dim)
-%PLI_NRMEXP Normalizes the exponents
+function Y = pli_softmax(X, dim)
+%PLI_SOFTMAX Softmax activation function
 %
-%   Y = PLI_NRMEXP(X);
-%   Y = PLI_NRMEXP(X, dim);
+%   Y = PLI_SOFTMAX(X);
+%   Y = PLI_SOFTMAX(X, dim);
 %
 %       Normalizes exp(X) such that the exponent values sum to ones
 %       along the specified dimension. When dim is omitted, it runs

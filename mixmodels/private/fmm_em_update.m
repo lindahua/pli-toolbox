@@ -30,7 +30,7 @@ L = evaluate_loglik(mdl, params, obs);
 
 % E-step
 
-Q = pli_nrmexp(bsxfun(@plus, L, log(pi)), 1);
+Q = pli_softmax(bsxfun(@plus, L, log(pi)), 1);
 
 % write update to sol
 

@@ -82,7 +82,7 @@ r(c < 0) = inf;
 objv = sum(u) + sum(r);
 
 if nargout >= 2
-    P = pli_nrmexp(Y, 1);
+    P = pli_softmax(Y, 1);
     P(idx) = P(idx) - 1;
     grad = sum(P .* X, 2) + lambda * c;
 end
