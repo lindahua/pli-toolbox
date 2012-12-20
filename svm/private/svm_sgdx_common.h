@@ -5,6 +5,7 @@
  **********************************************************/
 
 #include <light_mat/matlab/matlab_port.h>
+#include <light_mat/mateval/mat_reduce.h>
 
 using namespace lmat;
 using namespace lmat::matlab;
@@ -36,7 +37,7 @@ public:
     LMAT_ENSURE_INLINE
     double sqnorm() const
     {
-        return lmat::sqL2norm(_w);
+        return lmat::sqsum(_w);
     }
     
     LMAT_ENSURE_INLINE
@@ -103,7 +104,7 @@ public:
     LMAT_ENSURE_INLINE
     double sqnorm() const
     {
-        return lmat::sqL2norm(_w) + _w0 * _w0;
+        return lmat::sqsum(_w) + _w0 * _w0;
     }
     
     LMAT_ENSURE_INLINE

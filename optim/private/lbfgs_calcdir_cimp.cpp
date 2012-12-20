@@ -8,6 +8,7 @@
  **********************************************************/
 
 #include <light_mat/matlab/matlab_port.h>
+#include <light_mat/mateval/mat_reduce.h>
 
 using namespace lmat;
 using namespace lmat::matlab;
@@ -69,7 +70,8 @@ struct LBFGS_Update
         cvec_t y = Y.column(j);
         
         alpha[j] = rho[j] * dot(s, q);
-        q -= alpha[j] * y;
+        
+        accum_to(q, -alpha[j], y);
     }
     
     
@@ -80,7 +82,8 @@ struct LBFGS_Update
         cvec_t y = Y.column(j);
         
         double beta = rho[j] * dot(y, z);
-        z += (alpha[j] - beta) * s;
+        
+        accum_to(z, alpha[j] - beta, s);
     }
     
     

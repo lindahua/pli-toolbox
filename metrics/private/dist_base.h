@@ -18,8 +18,8 @@
 
 template<typename T, class Dist, class SMat, class DMat>
 inline void pw_dists(Dist dist,
-        const lmat::IDenseMatrix<SMat, T>& X, 
-        lmat::IDenseMatrix<DMat, T>& D)
+        const lmat::IRegularMatrix<SMat, T>& X, 
+        lmat::IRegularMatrix<DMat, T>& D)
 {
     const lmat::index_t d = X.nrows();
     const lmat::index_t n = X.ncolumns();
@@ -47,9 +47,9 @@ inline void pw_dists(Dist dist,
 
 template<typename T, class Dist, class LMat, class RMat, class DMat>
 inline void pw_dists(Dist dist,
-        const lmat::IDenseMatrix<LMat, T>& X, 
-        const lmat::IDenseMatrix<RMat, T>& Y,
-        lmat::IDenseMatrix<DMat, T>& D)
+        const lmat::IRegularMatrix<LMat, T>& X, 
+        const lmat::IRegularMatrix<RMat, T>& Y,
+        lmat::IRegularMatrix<DMat, T>& D)
 {
     const lmat::index_t d = X.nrows();
     const lmat::index_t m = X.ncolumns();

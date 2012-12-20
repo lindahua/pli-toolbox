@@ -220,8 +220,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
         k = _C0.ncolumns();
         
-        copy_mem(d * k, _C0.data<double>(), C.ptr_data());
-        copy_mem(k, _w0.data<double>(), w.ptr_data());        
+        copy_vec(d * k, _C0.data<double>(), C.ptr_data());
+        copy_vec(k, _w0.data<double>(), w.ptr_data());        
     }
     
     
@@ -240,8 +240,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         _C = marray::numeric_matrix<double>(d, k);
         _w = marray::numeric_matrix<double>(1, k);
         
-        copy_mem(d * k, C.ptr_data(), _C.data<double>());
-        copy_mem(k, w.ptr_data(), _w.data<double>());
+        copy_vec(d * k, C.ptr_data(), _C.data<double>());
+        copy_vec(k, w.ptr_data(), _w.data<double>());
         
         _Ctmp.destroy();
         _wtmp.destroy();

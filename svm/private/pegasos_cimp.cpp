@@ -6,7 +6,6 @@
 
 #include "svm_sgdx_common.h"
 
-
 /**
  * w = alpha * w + (eta/k) sum_{i in A} y_i x_i
  *

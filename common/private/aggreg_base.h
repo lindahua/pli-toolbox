@@ -7,7 +7,7 @@
 #ifndef PLI_AGGREG_BASE_H
 #define PLI_AGGREG_BASE_H
 
-#include <light_mat/common/basic_defs.h>
+#include <light_mat/common/memory.h>
 #include <limits>
 
 // operations
@@ -30,7 +30,7 @@ struct aop_max
     void init(const lmat::index_t n, T *x) 
     {
         T v0 = -std::numeric_limits<T>::infinity();
-        fill_val(v0, n, x);
+        lmat::fill_vec(n, x, v0);
     }
     
     LMAT_ENSURE_INLINE
@@ -48,7 +48,7 @@ struct aop_min
     void init(const lmat::index_t n, T *x) 
     {
         T v0 = std::numeric_limits<T>::infinity();
-        fill_val(v0, n, x);
+        lmat::fill_vec(n, x, v0);
     }
     
     LMAT_ENSURE_INLINE
